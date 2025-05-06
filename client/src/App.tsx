@@ -10,7 +10,7 @@ import { ProtectedRoute } from "./lib/protected-route";
 import { AuthProvider } from "@/hooks/use-auth";
 
 function Router() {
-  return (
+  return ( // TODO: Add a loading state
     <Switch>
       <ProtectedRoute path="/" component={Home} />
       <Route path="/auth" component={AuthPage} />
