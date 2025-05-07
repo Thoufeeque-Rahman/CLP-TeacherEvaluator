@@ -13,19 +13,24 @@ export default function StudentCard({ student, animate = false }: StudentCardPro
       <Card className="bg-white rounded-xl shadow-md overflow-hidden mb-6 p-6 flex flex-col items-center">
         <div className="mb-4">
           <Avatar className="w-24 h-24 border-4 border-primary">
-            <AvatarFallback>?</AvatarFallback>
+            <AvatarFallback>
+              <h3>20</h3>
+            </AvatarFallback>
           </Avatar>
         </div>
         <div className="w-full text-center">
-          <div className="h-6 bg-gray-200 rounded animate-pulse mb-3 w-2/3 mx-auto"></div>
+          <p>Thoufeeque Rahman</p>
+          {/* <div className="h-6 bg-gray-200 rounded animate-pulse mb-3 w-2/3 mx-auto"></div> */}
           <div className="mt-3 w-full space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Roll Number:</span>
-              <div className="h-4 bg-gray-200 rounded animate-pulse w-1/4"></div>
+              <p>20</p>
+              {/* <div className="h-4 bg-gray-200 rounded animate-pulse w-1/4"></div> */}
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">Admission No.:</span>
-              <div className="h-4 bg-gray-200 rounded animate-pulse w-1/4"></div>
+              <p>84</p>
+              {/* <div className="h-4 bg-gray-200 rounded animate-pulse w-1/4"></div> */}
             </div>
           </div>
         </div>

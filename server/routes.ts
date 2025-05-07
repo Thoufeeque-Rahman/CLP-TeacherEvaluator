@@ -26,6 +26,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API routes for subjects - authenticated routes
   app.get("/api/subjects", ensureAuthenticated, async (req, res) => {
     const subjects = await storage.getSubjects();
+    console.log("Subjects:", subjects);
+    
     res.json(subjects);
   });
 

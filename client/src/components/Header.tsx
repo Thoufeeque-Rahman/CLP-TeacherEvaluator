@@ -35,7 +35,7 @@ export default function Header({
         <div>
           <h1 className="text-xl font-bold">Learning Platform</h1>
           <div className={`text-sm mt-1 transition-opacity duration-300 ${showContext ? 'opacity-100' : 'opacity-0'}`}>
-            <span>{selectedClass}</span> | <span>{selectedSubject}</span>
+            <span>{selectedSubject}</span>
           </div>
         </div>
         <div className="flex items-center space-x-4">

@@ -84,7 +84,7 @@ export class MemStorage implements IStorage {
     });
     
     // Add some default subjects
-    const subjects = ['Mathematics', 'Science', 'English', 'History'];
+    const subjects = ['Manthiq 10', 'Jamul Javami 10', 'Maths 6', 'English 5', 'Hindi 3', 'Science 2', 'Social Science 9'];
     subjects.forEach(subjectName => {
       this.createSubject({ name: subjectName });
     });

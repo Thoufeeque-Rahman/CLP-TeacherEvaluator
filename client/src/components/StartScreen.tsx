@@ -21,8 +21,14 @@ export default function StartScreen({
   onClassSelect,
   onSubjectSelect,
   onProceed,
-  isProceedEnabled
+  isProceedEnabled,
 }: StartScreenProps) {
+  const onProceedNext = (subject: SubjectInfo) => {
+    onProceed;
+    onSubjectSelect(subject);
+    console.log("Selected Subject:", subject);
+    console.log(isProceedEnabled);
+  };
   return (
     <div className="p-6 transition-all duration-300 transform">
       <div className="text-center mb-8 mt-4">
@@ -32,9 +38,9 @@ export default function StartScreen({
         <h2 className="text-2xl font-bold text-gray-800">Teacher Evaluation</h2>
         <p className="text-gray-600 mt-2">Select class and subject to begin</p>
       </div>
-      
+
       {/* Class Selection */}
-      <div className="mb-6">
+      {/* <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">Select Class</label>
         <div className="grid grid-cols-2 gap-3">
           {classes.map((classItem) => (
@@ -49,28 +55,40 @@ export default function StartScreen({
             </button>
           ))}
         </div>
-      </div>
-      
+      </div> */}
+
       {/* Subject Selection */}
       <div className="mb-8">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Select Subject</label>
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          Select Subject
+        </label>
         <div className="grid grid-cols-2 gap-3">
-          {subjects.map((subject) => (
+          {subjects.map((subject, index) => (
             <button
               key={subject.id}
               className={`border border-gray-200 rounded-lg py-3 px-4 text-center hover:bg-gray-50 focus:outline-none transition-all ${
-                selectedSubject?.id === subject.id ? 'ring-2 ring-primary bg-blue-50' : ''
+                selectedSubject?.id === subject.id
+                  ? "ring-2 ring-primary bg-blue-50"
+                  : ""
               }`}
-              onClick={() => onSubjectSelect(subject)}
+              style={{
+                backgroundColor: `hsl(${(index * 40) % 360}, 70%, 90%)`,
+                borderColor: `hsl(${(index * 40) % 360}, 70%, 50%)`,
+
+              }}
+              onClick={() => {
+                onSubjectSelect(subject);
+                // onProceed();
+              }}
             >
               {subject.name}
             </button>
           ))}
         </div>
       </div>
-      
+
       {/* Proceed Button */}
-      <Button
+      {/* <Button
         className="w-full py-4 px-4 rounded-lg text-white font-bold shadow-md transition-all"
         disabled={!isProceedEnabled}
         onClick={onProceed}
@@ -79,7 +97,7 @@ export default function StartScreen({
           <span>Begin Evaluation</span>
           <ArrowRight className="ml-2 w-4 h-4" />
         </div>
-      </Button>
+      </Button> */}
     </div>
   );
 }
