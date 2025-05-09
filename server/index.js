@@ -78,7 +78,7 @@ app.use(express.json());
 
 // Connect to MongoDB
 mongoose
-  .connect(process.env.MONGODB_URI + 'my_clp_db', {
+  .connect(process.env.MONGODB_URI + 'my_dvt_db', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -91,10 +91,8 @@ app.get("/", (req, res) => {
 });
 
 const studentRoutes = require('./routes/students');
-const movieRoutes = require('./routes/movies');
 
 app.use('/api/students', studentRoutes);
-app.use('/api/movies', movieRoutes);
 
 
 // Start the server
