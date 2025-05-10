@@ -7,6 +7,7 @@ import {
 import { insertUserSchema, User as SelectUser, InsertUser } from "@shared/schema";
 import { getQueryFn, apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import axios from "axios";
 
 type AuthContextType = {
   user: SelectUser | null;
@@ -17,7 +18,7 @@ type AuthContextType = {
   registerMutation: UseMutationResult<SelectUser, Error, InsertUser>;
 };
 
-type LoginData = Pick<InsertUser, "username" | "password">;
+type LoginData = Pick<InsertUser, "phone" | "password">;
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -34,7 +35,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
-      const res = await apiRequest("POST", "/api/login", credentials);
+      // const res = await apiRequest("POST", "/api/login", credentials);
+      await axios.post("/api/teachers/login", credentials, {
+        withCredentials: true,
+      }).then((response) => {
+        if (response.status !== 200) {
+          throw new Error("Login failed");
+        }
+        return response.data;
+      }).catch((error) => {
+        if (error.response) {
+          throw new Error(error.response.data.message);
+        } else {
+          throw new Error("Network error");
+        }
+      }
+      );
+      // const res = await apiRequest("POST", "/api/login", credentials);
       return await res.json();
     },
     onSuccess: (user: SelectUser) => {

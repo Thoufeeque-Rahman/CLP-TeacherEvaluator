@@ -73,7 +73,10 @@ require("dotenv").config();
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173', // Replace with your React app's URL
+  credentials: true
+}));
 app.use(express.json());
 
 // Connect to MongoDB
@@ -90,9 +93,13 @@ app.get("/", (req, res) => {
   res.send("API is running...");
 });
 
+// Import routes
 const studentRoutes = require('./routes/students');
+const teachersRoutes = require('./routes/teachers');
 
+// Use routes
 app.use('/api/students', studentRoutes);
+app.use('/api/teachers', teachersRoutes);  
 
 
 // Start the server

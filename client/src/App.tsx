@@ -8,16 +8,18 @@ import Home from "@/pages/Home";
 import AuthPage from "@/pages/auth-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { AuthProvider } from "@/hooks/use-auth";
+import Dashboard from "./pages/admin/dashboard";
 
 function Router() {
   return ( // TODO: Add a loading state
     <Switch>
       <ProtectedRoute path="/" component={Home} />
       <Route path="/auth" component={AuthPage} />
+      <Route path="/admin/*" component={Dashboard}/>
       <Route component={NotFound} />
     </Switch>
   );
-}
+} 
 
 function App() {
   return (

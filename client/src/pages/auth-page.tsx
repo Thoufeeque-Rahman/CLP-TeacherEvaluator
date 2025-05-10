@@ -1,12 +1,20 @@
 import { useState } from "react";
 import { Redirect } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { GraduationCap } from "lucide-react";
+import axios from "axios";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -22,7 +30,7 @@ export default function AuthPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!username || !password) {
       toast({
         title: "Missing fields",
@@ -61,6 +69,14 @@ export default function AuthPage() {
     }
   };
 
+  axios.get('http://localhost:5000/api/students', { withCredentials: true })
+  .then(response => {
+    // Handle the fetched data
+    console.log(response.data);
+  });
+ 
+  
+
   const toggleMode = () => {
     setIsLogin(!isLogin);
     setUsername("");
@@ -75,17 +91,21 @@ export default function AuthPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary mb-2">
             <GraduationCap className="h-8 w-8 text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">Teacher Evaluation Platform</h1>
-          <p className="text-gray-500 mt-1">Sign in to manage student evaluations</p>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Teacher Evaluation Platform
+          </h1>
+          <p className="text-gray-500 mt-1">
+            Sign in to manage student evaluations
+          </p>
         </div>
-        
+
         {/* Auth Card */}
         <Card>
           <CardHeader>
             <CardTitle>{isLogin ? "Login" : "Register"}</CardTitle>
             <CardDescription>
-              {isLogin 
-                ? "Enter your credentials to access your account" 
+              {isLogin
+                ? "Enter your credentials to access your account"
                 : "Create a new account to get started"}
             </CardDescription>
           </CardHeader>
@@ -114,17 +134,21 @@ export default function AuthPage() {
               </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-3">
-              <Button 
-                type="submit" 
-                className="w-full" 
+              <Button
+                type="submit"
+                className="w-full"
                 disabled={loginMutation.isPending || registerMutation.isPending}
               >
-                {loginMutation.isPending || registerMutation.isPending 
-                  ? "Processing..." 
-                  : isLogin ? "Login" : "Register"}
+                {loginMutation.isPending || registerMutation.isPending
+                  ? "Processing..."
+                  : isLogin
+                  ? "Login"
+                  : "Register"}
               </Button>
               <p className="text-sm text-center text-gray-500">
-                {isLogin ? "Don't have an account?" : "Already have an account?"}
+                {isLogin
+                  ? "Don't have an account?"
+                  : "Already have an account?"}
                 <button
                   type="button"
                   onClick={toggleMode}
