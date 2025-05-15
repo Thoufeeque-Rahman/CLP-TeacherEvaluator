@@ -14,24 +14,24 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { GraduationCap } from "lucide-react";
-import axios from "axios";
+import axios from "@/lib/axios";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
-  const [username, setUsername] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const { toast } = useToast();
-  const { user, loginMutation, registerMutation } = useAuth();
+  const { user, isLoading, login, register } = useAuth();
 
   // Redirect if already logged in
   if (user) {
     return <Redirect to="/" />;
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
 
-    if (!username || !password) {
+    if (!phone || !password) {
       toast({
         title: "Missing fields",
         description: "Please fill in all required fields",
@@ -40,46 +40,79 @@ export default function AuthPage() {
       return;
     }
 
+    const payload = { phone, password };
+
     if (isLogin) {
-      loginMutation.mutate(
-        { username, password },
-        {
-          onError: (error: Error) => {
-            toast({
-              title: "Login failed",
-              description: error.message,
-              variant: "destructive",
-            });
-          },
-        }
-      );
+      await login({ phone: phone, password: password });
+      console.log(payload);
+      
+      
     } else {
-      registerMutation.mutate(
-        { username, password },
-        {
-          onError: (error: Error) => {
-            toast({
-              title: "Registration failed",
-              description: error.message,
-              variant: "destructive",
-            });
-          },
-        }
-      );
+      await register({ phone: phone, password: password });
     }
   };
 
-  axios.get('http://localhost:5000/api/students', { withCredentials: true })
-  .then(response => {
-    // Handle the fetched data
-    console.log(response.data);
-  });
- 
-  
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+
+  //   if (!phone || !password) {
+  //     toast({
+  //       title: "Missing fields",
+  //       description: "Please fill in all required fields",
+  //       variant: "destructive",
+  //     });
+  //     return;
+  //   }
+
+  //   try {
+  //     const endpoint = isLogin ? "/api/teachers/login" : "/api/teachers/register";
+  //     const response = await axios.post(
+  //       `http://localhost:5000${endpoint}`,
+  //       { phone, password },
+  //       { withCredentials: true }
+  //     );
+  //     console.log(response.data.userId);
+
+  //     if (isLogin) {
+  //       // Store the token in local storage or a cookie
+  //       const { token } = response.data.token;
+  //       localStorage.setItem("token", token);
+
+  //       // Redirect or update UI as needed
+  //       toast({
+  //         title: "Login successful",
+  //         description: "Welcome back!",
+  //         variant: "default",
+  //       });
+
+  //       <Redirect to="/" />;
+  //     } else {
+  //       toast({
+  //         title: "Registration successful",
+  //         description: "You can now log in with your credentials",
+  //         variant: "default",
+  //       });
+  //       setIsLogin(true);
+  //     }
+  //   } catch (error) {
+  //     toast({
+  //       title: isLogin ? "Login failed" : "Registration failed",
+  //       description: (error as any).response?.data?.error || (error as any).message,
+  //       variant: "destructive",
+  //     });
+  //   }
+  // };
+
+  // axios
+  //   .get("http://localhost:5000/api/students", { withCredentials: true })
+  //   .then((response) => {
+  //     // Handle the fetched data
+  //     console.log(response.data);
+  //   });
 
   const toggleMode = () => {
     setIsLogin(!isLogin);
-    setUsername("");
+    setPhone("");
     setPassword("");
   };
 
@@ -112,12 +145,12 @@ export default function AuthPage() {
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
+                <Label htmlFor="phone">Phone</Label>
                 <Input
-                  id="username"
-                  placeholder="Enter your username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  id="phone"
+                  placeholder="Enter your phone"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
                   required
                 />
               </div>
@@ -137,15 +170,13 @@ export default function AuthPage() {
               <Button
                 type="submit"
                 className="w-full"
-                disabled={loginMutation.isPending || registerMutation.isPending}
+                
               >
-                {loginMutation.isPending || registerMutation.isPending
-                  ? "Processing..."
-                  : isLogin
+                {isLogin
                   ? "Login"
                   : "Register"}
               </Button>
-              <p className="text-sm text-center text-gray-500">
+              {/* <p className="text-sm text-center text-gray-500">
                 {isLogin
                   ? "Don't have an account?"
                   : "Already have an account?"}
@@ -156,7 +187,7 @@ export default function AuthPage() {
                 >
                   {isLogin ? "Register" : "Login"}
                 </button>
-              </p>
+              </p> */}
             </CardFooter>
           </form>
         </Card>

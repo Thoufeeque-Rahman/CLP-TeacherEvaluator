@@ -1,55 +1,58 @@
-const express = require("express");
+const express = require('express');
+const jwt = require('jsonwebtoken');
+const Teachers = require('../models/Teachers');
 const router = express.Router();
-const Teacher = require("../models/Teachers");
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");    
-const { body, validationResult } = require("express-validator");
+const bcrypt = require('bcryptjs');
 
+// Registration
+router.post('/register', async (req, res) => {
+  try {
+    const { phone, password } = req.body;
+    const user = new Teachers({ phone, password });
+    await user.save();
+    res.status(201).json({ message: 'User registered successfully' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // Login
-router.post(
-    "/login",
-    [
-        body("phone", "Phone number is required").isMobilePhone(),
-        body("password", "Password is required").exists(),
-    ],
-    async (req, res) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
+router.post('/login', async (req, res) => {
+  try {
+    const { phone, password } = req.body; 
+    const user = await Teachers.findOne({ phone });
+    if (!user) return res.status(400).json({ error: 'Invalid credentials' });
+    console.log(user);
+    
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
 
-        const { phone, password } = req.body;
+    const token = jwt.sign({ id: user._id }, 'your_jwt_secret', { expiresIn: '1h' });
+    res.json({ token, userId: user._id, phone: user.phone });
+  } catch (error) {
+    res.status(500).json({ error: 'Login failed' });
+  }
+});
 
-        try {
-            const teacher = await Teacher.findOne({ phone });
-            if (!teacher) {
-                return res.status(404).json({ error: "Teacher not found" });
-            }
+// Get all teachers
+router.get('/', async (req, res) => {
+  try {
+    const teachers = await Teachers.find();
+    res.json(teachers);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch teachers' });
+  }
+});
 
-            const isMatch = await bcrypt.compare(password, teacher.password);
-            if (!isMatch) {
-                return res.status(401).json({ error: "Invalid credentials" });
-            }
-
-            const payload = {
-                teacher: {
-                    id: teacher.id,
-                },
-            };
-
-            const token = jwt.sign(payload, process.env.JWT_SECRET, {
-                expiresIn: "1h",
-            });
-
-            res.json({ token });
-        } catch (err) {
-            console.error(err.message);
-            res.status(500).send("Server error");
-        }
-    }
-);
-
-
+// Get a teacher by ID
+router.get('/:teacherId', async (req, res) => {
+  try {
+    const teacher = await Teachers.findById(req.params.teacherId);
+    if (!teacher) return res.status(404).json({ error: 'Teacher not found' });
+    res.json(teacher);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch teacher' });
+  }
+});
 
 module.exports = router;

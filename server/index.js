@@ -74,7 +74,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:5173', // Replace with your React app's URL
+  origin: 'https://v6xrx50k-5173.inc1.devtunnels.ms', // Replace with your React app's URL
   credentials: true
 }));
 app.use(express.json());
@@ -96,10 +96,12 @@ app.get("/", (req, res) => {
 // Import routes
 const studentRoutes = require('./routes/students');
 const teachersRoutes = require('./routes/teachers');
+const roundsRoutes = require('./routes/rounds');
 
 // Use routes
 app.use('/api/students', studentRoutes);
-app.use('/api/teachers', teachersRoutes);  
+app.use('/api/teachers', teachersRoutes); 
+app.use('/api/rounds', roundsRoutes);
 
 
 // Start the server

@@ -11,26 +11,26 @@ interface EvaluationScreenProps {
   currentStudent: Student | undefined;
   currentIndex: number;
   totalStudents: number;
+  studentsNot: number;
   currentEvaluation: "poor" | "good" | "great" | null;
   onEvaluate: (value: "poor" | "good" | "great") => void;
   onSkip: () => void;
-  onNext: () => void;
+  onNext: (value: "poor" | "good" | "great") => void;
   onFinish: () => void;
   isNextEnabled: boolean;
-  isLoading: boolean;
 }
 
 export default function EvaluationScreen({
   currentStudent,
   currentIndex,
   totalStudents,
+  studentsNot,
   currentEvaluation,
   onEvaluate,
   onSkip,
   onNext,
   onFinish,
   isNextEnabled,
-  isLoading,
 }: EvaluationScreenProps) {
   const [studentKey, setStudentKey] = useState(0);
   const [status, setStatus] = useState<"great" | "good" | "poor">("great");
@@ -42,19 +42,19 @@ export default function EvaluationScreen({
   }, [currentStudent?.id]);
 
   const progressPercent =
-    27 > 0 // totalStudents
-      ? ((5 + 1) / 27) * 100 // totalStudents
+    totalStudents > 0 // totalStudents
+      ? (studentsNot / totalStudents) * 100 // totalStudents
       : 0;
 
   return (
     <div className="p-6 transition-all duration-300 transform">
-      <Input className="mb-4" placeholder="🔎 Search Student" />
+      {/* <Input className="mb-4" placeholder="🔎 Search Student" /> */}
       {/* Progress Indicator */}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
           <span className="text-sm text-gray-600">Evaluating Students</span>
           <span className="text-sm font-medium">
-            {27 > 0 ? `${5 + 1} of ${27}` : "Loading..."} {/* totalStudents */}
+            {totalStudents > 0 ? `${studentsNot} of ${totalStudents}` : "Loading..."} {/* totalStudents */}
           </span>
         </div>
         <Progress value={progressPercent} className="w-full h-2.5" />
@@ -81,7 +81,6 @@ export default function EvaluationScreen({
             onClick={() => {
               onEvaluate("great");
               setStatus("great");
-              onNext();
             }}
           >
             <div className="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center mb-2">
@@ -127,9 +126,8 @@ export default function EvaluationScreen({
         {status !== "great" && (
           <Button
             variant="destructive"
-            className="flex-1 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+            className="flex-1 py-3 border border-gray-300 rounded-lg font-medium transition-colors"
             onClick={() => setPunishmentModalOpen(true)}
-            disabled={isLoading}
           >
             Punishment
           </Button>
@@ -140,15 +138,14 @@ export default function EvaluationScreen({
           variant="outline"
           className="flex-1 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
           onClick={onSkip}
-          disabled={isLoading}
         >
           Skip
         </Button>
         <Button
           className="flex-1 py-3 rounded-lg font-medium transition-colors"
           onClick={onNext}
-          disabled={isLoading}
-        >
+          disabled={status === "great"}
+        > 
           Next
         </Button>
       </div>

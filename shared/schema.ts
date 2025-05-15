@@ -7,6 +7,8 @@ export const users = pgTable("users", {
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   phone: text("phone"),
+  subjectsTaught: text("subjects_taught").array(), // Array of subjects taught
+  // classesAssigned: text("classes_assigned").array(), // Array of classes assigned
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -45,18 +47,19 @@ export type Subject = typeof subjects.$inferSelect;
 
 // Students table
 export const students = pgTable("students", {
-  id: serial("id").primaryKey(),
+  _id: serial("id").primaryKey(),
   name: text("name").notNull(),
   rollNumber: text("roll_number").notNull(),
-  admissionNumber: text("admission_number").notNull().unique(),
+  adNumber: text("ad_number").notNull().unique(),
   photoUrl: text("photo_url"),
   classId: integer("class_id").notNull(),
 });
 
 export const insertStudentSchema = createInsertSchema(students).pick({
+  _id: true,
   name: true,
   rollNumber: true,
-  admissionNumber: true,
+  adNumber: true,
   photoUrl: true,
   classId: true,
 });

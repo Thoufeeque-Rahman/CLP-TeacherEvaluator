@@ -1,114 +1,140 @@
-import { createContext, ReactNode, useContext } from "react";
 import {
-  useQuery,
-  useMutation,
-  UseMutationResult,
-} from "@tanstack/react-query";
-import { insertUserSchema, User as SelectUser, InsertUser } from "@shared/schema";
-import { getQueryFn, apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
 import axios from "axios";
+import { useToast } from "@/hooks/use-toast";
+import { InsertUser, User as SelectUser } from "@shared/schema";
+
+type LoginData = {
+  phone: string;
+  password: string;
+};
 
 type AuthContextType = {
   user: SelectUser | null;
   isLoading: boolean;
-  error: Error | null;
-  loginMutation: UseMutationResult<SelectUser, Error, LoginData>;
-  logoutMutation: UseMutationResult<void, Error, void>;
-  registerMutation: UseMutationResult<SelectUser, Error, InsertUser>;
+  error: string | null;
+  login: (credentials: LoginData) => Promise<void>;
+  register: (credentials: InsertUser) => Promise<void>;
+  logout: () => Promise<void>;
 };
 
-type LoginData = Pick<InsertUser, "phone" | "password">;
-
-export const AuthContext = createContext<AuthContextType | null>(null);
+const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<SelectUser | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [teacherId, setTeacherId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const {
-    data: user,
-    error,
-    isLoading,
-  } = useQuery<SelectUser | null, Error>({
-    queryKey: ['/api/user'],
-    queryFn: getQueryFn({ on401: "returnNull" }),
-  });
 
-  const loginMutation = useMutation({
-    mutationFn: async (credentials: LoginData) => {
-      // const res = await apiRequest("POST", "/api/login", credentials);
-      await axios.post("/api/teachers/login", credentials, {
-        withCredentials: true,
-      }).then((response) => {
-        if (response.status !== 200) {
-          throw new Error("Login failed");
+  // Load user on mount (optional: based on token/cookie)
+  useEffect(() => {
+    fetchUser(user?.id);
+  }, []);
+  
+  const fetchUser = async (teacherID: number | undefined) => {
+    try {
+      const res = await axios.get(
+        `https://v6xrx50k-5000.inc1.devtunnels.ms/api/teachers/${teacherID}`,
+        {
+          withCredentials: true,
         }
-        return response.data;
-      }).catch((error) => {
-        if (error.response) {
-          throw new Error(error.response.data.message);
-        } else {
-          throw new Error("Network error");
-        }
-      }
       );
-      // const res = await apiRequest("POST", "/api/login", credentials);
-      return await res.json();
-    },
-    onSuccess: (user: SelectUser) => {
-      queryClient.setQueryData(['/api/user'], user);
-    },
-    onError: (error: Error) => {
+      // console.log(res.data);
+
+      setUser(res.data);
+    } catch (err) {
+      setUser(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const login = async (credentials: LoginData) => {
+    try {
+      setIsLoading(true);
+      const response = await axios.post(
+        "https://v6xrx50k-5000.inc1.devtunnels.ms/api/teachers/login",
+        credentials,
+        { withCredentials: true }
+      );
+      const data = response.data;
+      // console.log(data);
+      setUser(data.user);
+      setTeacherId(data.userId);
+      // console.log(data.userId);
+
+      localStorage.setItem("token", data.token);
+      await fetchUser(data.userId);
+      if (user) toast({ title: "Login successful", description: "Welcome back!" }); await fetchUser(data.userId);
+      // fetchUser();
+    } catch (err: any) {
+      setError(err.message);
       toast({
         title: "Login failed",
-        description: error.message,
+        description: err.message,
         variant: "destructive",
       });
-    },
-  });
+      console.error("Login error:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  }; 
 
-  const registerMutation = useMutation({
-    mutationFn: async (credentials: InsertUser) => {
-      const res = await apiRequest("POST", "/api/register", credentials);
-      return await res.json();
-    },
-    onSuccess: (user: SelectUser) => {
-      queryClient.setQueryData(['/api/user'], user);
-    },
-    onError: (error: Error) => {
+  const register = async (credentials: InsertUser) => {
+    try {
+      setIsLoading(true);
+      const response = await axios.post(
+        "https://v6xrx50k-5000.inc1.devtunnels.ms/api/teachers/register",
+        credentials,
+        { withCredentials: true }
+      );
+      const data = response.data;
+      setUser(data.user);
+      toast({
+        title: "Registration successful",
+        description: "You can now log in.",
+      });
+    } catch (err: any) {
+      setError(err.message);
       toast({
         title: "Registration failed",
-        description: error.message,
+        description: err.message,
         variant: "destructive",
       });
-    },
-  });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  const logoutMutation = useMutation({
-    mutationFn: async () => {
-      await apiRequest("POST", "/api/logout");
-    },
-    onSuccess: () => {
-      queryClient.setQueryData(['/api/user'], null);
-    },
-    onError: (error: Error) => {
+  const logout = async () => {
+    try {
+      await axios.post(
+        "https://v6xrx50k-5000.inc1.devtunnels.ms/api/logout",
+        {},
+        { withCredentials: true }
+      );
+      setUser(null);
+      localStorage.removeItem("token");
+      toast({ title: "Logged out successfully" });
+    } catch (err: any) {
+      setError(err.message);
       toast({
         title: "Logout failed",
-        description: error.message,
+        description: err.message,
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
   return (
     <AuthContext.Provider
-      value={{
-        user: user ?? null,
-        isLoading,
-        error,
-        loginMutation,
-        logoutMutation,
-        registerMutation,
-      }}
+      value={{ user, isLoading, error, login, register, logout }}
     >
       {children}
     </AuthContext.Provider>
