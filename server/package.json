@@ -11,12 +11,18 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "are-we-there-yet": "^4.0.2",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
+    "gauge": "^5.0.2",
+    "glob": "^11.0.2",
+    "inflight": "^1.0.6",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.14.1",
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "npmlog": "^7.0.1",
+    "rimraf": "^6.0.1"
   }
 }
