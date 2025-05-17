@@ -30,14 +30,27 @@ export default function Home() {
   const [rounds, setRounds] = useState<
     { studentsNotAsked: string[]; _id: string }[]
   >([]);
-  const [currentStudent, setCurrentStudent] = useState<Student | null>(null);
+  const [currentStudent, setCurrentStudent] = useState<Student>({} as Student);
   const [punishmentModalOpen, setPunishmentModalOpen] = useState(false);
+  const [punishment, setPunishment] = useState<string>();
   const [currentEvaluation, setCurrentEvaluation] = useState<
     "poor" | "good" | "great" | null
   >(null);
   const [students, setStudents] = useState([]);
   const [currentStudentIndex, setCurrentStudentIndex] = useState(0);
   const { toast } = useToast();
+
+  const handleProceed = async () => {
+    if (selectedSubject && selectedSubject.subject && selectedSubject.class) {
+      //if (selectedClass && selectedSubject) {
+      console.log("Evaluation started");
+      const students = await fetchStudents(selectedSubject.class);
+      console.log("Data:", students);
+      console.log("Students:", students);
+      fetchRound(selectedSubject, students);
+      // setActiveScreen("evaluation");
+    }
+  };
 
   // Fetch students based on selected class
   const fetchStudents = async (classId: number) => {
@@ -84,16 +97,19 @@ export default function Home() {
     );
     if (!response.ok) {
       console.log("Failed to create round:", response.statusText);
-
       throw new Error("Failed to create round" + response.statusText);
     }
     const data = await response.json();
     setRounds(data);
     console.log("Created Round:", data);
+    const currentStudent = await getRandomStudent(data);
+    setActiveScreen("evaluation");
+
+    console.log("Random Student:", currentStudent);
   };
 
   // Fetch round based on selected subject and class
-  const fetchRound = async (subject: SubjectInfo) => {
+  const fetchRound = async (subject: SubjectInfo, students: Student[]) => {
     console.log("Fetching round for subject:", subject);
     const response = await fetch(
       `https://v6xrx50k-5000.inc1.devtunnels.ms/api/rounds/${subject.subject}/${subject.class}`,
@@ -107,13 +123,15 @@ export default function Home() {
     );
     if (!response.ok) {
       console.log(students);
-
       createRound(subject, students);
       // throw new Error("Failed to fetch round");
     }
     const data = await response.json();
     setRounds(data);
-    const currentStudent = getRandomStudent(data);
+
+    const currentStudent = await getRandomStudent(data);
+    setActiveScreen("evaluation");
+
     console.log("Random Student:", currentStudent);
     console.log("Fetched Round:", data);
   };
@@ -127,18 +145,43 @@ export default function Home() {
       console.log("Students Not Asked:", studentsNotAsked);
       if (studentsNotAsked && studentsNotAsked.length > 0) {
         const randomIndex = Math.floor(Math.random() * studentsNotAsked.length);
-        fetchStudent(studentsNotAsked[randomIndex]);
-        // await students?.filter(
-        //   (student: { _id: string }) =>
-        //     student._id === studentsNotAsked[randomIndex]
-        // )[0];
-        // console.log("Matched Student:", matchedStudent);
-        // setCurrentStudent(matchedStudent);
+        await fetchStudent(studentsNotAsked[randomIndex]);
         return studentsNotAsked[randomIndex];
+      } else {
+        increaseRound();
       }
     }
     return null;
   };
+
+  const increaseRound = async () => {
+    console.log("Increasing round", rounds[0]);
+    const response = await fetch(
+      `https://v6xrx50k-5000.inc1.devtunnels.ms/api/rounds/${rounds[0]._id}/increaseRound`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          studentsNotAsked: students.map((student) => student._id),
+        }),
+        credentials: "include",
+
+      }
+    );
+    if (!response.ok) {
+      console.log("Failed to increase round:", response.statusText);
+      throw new Error("Failed to increase round" + response.statusText);
+    }
+    const data = await response.json();
+    setRounds(data);
+    console.log("Increased Round:", data);
+    const currentStudent = await getRandomStudent(data);
+    setActiveScreen("evaluation");
+    console.log("Random Student:", currentStudent);
+    return currentStudent;
+  }
 
   const fetchStudent = async (studentId: string) => {
     console.log("Fetching student with ID:", studentId);
@@ -234,17 +277,6 @@ export default function Home() {
     return data;
   };
 
-  const handleProceed = () => {
-    if (selectedSubject && selectedSubject.subject && selectedSubject.class) {
-      //if (selectedClass && selectedSubject) {
-      console.log("Evaluation started");
-      fetchStudents(selectedSubject.class);
-      fetchRound(selectedSubject);
-      console.log("Students:", students);
-      setActiveScreen("evaluation");
-    }
-  };
-
   const handleGoHome = () => {
     setActiveScreen("start");
     setCurrentStudentIndex(0);
@@ -262,7 +294,24 @@ export default function Home() {
       );
       // Submit evaluation with mark 2
       submitEvaluation(2);
-      handleNext(value);
+      toast({
+        title: "Great evaluation recorded",
+      });
+      handleNext();
+    } else if (value === "good") {
+      // Submit evaluation with mark 1
+      submitEvaluation(1, punishment);
+      toast({
+        title: "Good evaluation recorded",
+      });
+      handleNext();
+    } else if (value === "poor") {
+      // Submit evaluation with mark 0
+      submitEvaluation(0, punishment);
+      toast({
+        title: "Poor evaluation recorded",
+      });
+      handleNext();
     }
 
     // if (value !== "great") {
@@ -271,19 +320,12 @@ export default function Home() {
   };
 
   const handlePunishmentSubmit = (punishment: string) => {
-    submitEvaluation(0, punishment);
+    setPunishment(punishment);
     setPunishmentModalOpen(false);
-
-    // Show feedback toast
-    toast({
-      title: "Poor evaluation recorded",
-      variant: "destructive",
-    });
   };
 
   const handlePunishmentCancel = () => {
     setPunishmentModalOpen(false);
-    setCurrentEvaluation(null);
   };
 
   const handleSkip = () => {
@@ -291,16 +333,7 @@ export default function Home() {
     getRandomStudent(rounds);
   };
 
-  const handleNext = async (value: "great" | "good" | "poor") => {
-    console.log("Current Evaluation:", value);
-
-    if (value === "great" || currentEvaluation === "great") {
-      toast({
-        title: "Great evaluation recorded",
-        variant: "success",
-      });
-    }
-
+  const handleNext = async () => {
     removeStudentFromRound(String(currentStudent._id));
 
     // Move to next student
@@ -312,10 +345,10 @@ export default function Home() {
     setActiveScreen("start");
     setCurrentStudentIndex(0);
     setCurrentEvaluation(null);
+    setCurrentStudent({} as Student);
 
     toast({
       title: "Evaluation session completed",
-      variant: "success",
     });
   };
 
@@ -338,11 +371,6 @@ export default function Home() {
           credentials: "include",
         }
       );
-
-      // Invalidate queries if needed
-      // queryClient.invalidateQueries({
-      //   queryKey: ["/api/evaluations"],
-      // });
     } catch (error) {
       console.error("Failed to submit evaluation:", error);
       toast({
@@ -350,6 +378,8 @@ export default function Home() {
         description: "Please try again",
         variant: "destructive",
       });
+    } finally {
+      setCurrentEvaluation(null);
     }
   };
 
@@ -381,10 +411,12 @@ export default function Home() {
             totalStudents={students.length}
             studentsNot={rounds[0]?.studentsNotAsked.length || 0}
             currentEvaluation={currentEvaluation}
+            setCurrentEvaluation={setCurrentEvaluation}
             onEvaluate={handleEvaluate}
             onSkip={handleSkip}
             onNext={handleNext}
             onFinish={handleFinish}
+            setPunishmentModalOpen={setPunishmentModalOpen}
             isNextEnabled={!!currentEvaluation && currentEvaluation === "great"}
           />
         )}

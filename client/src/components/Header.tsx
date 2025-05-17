@@ -69,7 +69,7 @@ export default function Header({
                 <button className="focus:outline-none">
                   <Avatar className="h-8 w-8 border-2 border-white">
                     <AvatarFallback className="bg-primary-foreground text-primary text-sm">
-                      {user.username.substring(0, 2).toUpperCase()}
+                      {user.name.substring(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                 </button>
@@ -79,7 +79,7 @@ export default function Header({
                 <DropdownMenuSeparator />
                 <DropdownMenuItem className="cursor-pointer">
                   <User className="mr-2 h-4 w-4" />
-                  <span>{user.username}</span>
+                  <span>{user.name}</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   className="cursor-pointer text-red-600 focus:text-red-600"

@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { InsertUser, User as SelectUser } from "@shared/schema";
 
 type LoginData = {
-  phone: string;
+  email: string;
   password: string;
 };
 

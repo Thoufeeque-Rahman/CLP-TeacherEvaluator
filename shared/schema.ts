@@ -4,15 +4,17 @@ import { z } from "zod";
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
+  name: text("name").notNull(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
+  email: text("email").notNull().unique(),
   phone: text("phone"),
   subjectsTaught: text("subjects_taught").array(), // Array of subjects taught
   // classesAssigned: text("classes_assigned").array(), // Array of classes assigned
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
-  phone: true,
+  email: true,
   password: true,
 });
 

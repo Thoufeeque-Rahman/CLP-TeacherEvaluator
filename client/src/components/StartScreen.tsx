@@ -47,26 +47,8 @@ export default function StartScreen({
           <p className="text-gray-600 mt-2">
             Select a lesson to begin
           </p>
-          <p className="font-medium mt-2">Hey, {user.username.toUpperCase()}</p>
+          <p className="font-medium mt-2">Hey, {user.name.toUpperCase()}</p>
         </div>
-
-        {/* Class Selection */}
-        {/* <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Select Class</label>
-        <div className="grid grid-cols-2 gap-3">
-          {classes.map((classItem) => (
-            <button
-              key={classItem.id}
-              className={`border border-gray-200 rounded-lg py-3 px-4 text-center hover:bg-gray-50 focus:outline-none transition-all ${
-                selectedClass?.id === classItem.id ? 'ring-2 ring-primary bg-blue-50' : ''
-              }`}
-              onClick={() => onClassSelect(classItem)}
-            >
-              {classItem.name}
-            </button>
-          ))}
-        </div>
-      </div> */}
 
         {/* Subject Selection */}
         <div className="mb-8">
@@ -93,17 +75,6 @@ export default function StartScreen({
           </div>
         </div>
 
-        {/* Proceed Button */}
-        {/* <Button
-        className="w-full py-4 px-4 rounded-lg text-white font-bold shadow-md transition-all"
-        disabled={!isProceedEnabled}
-        onClick={onProceed}
-      >
-        <div className="flex items-center justify-center">
-          <span>Begin Evaluation</span>
-          <ArrowRight className="ml-2 w-4 h-4" />
-        </div>
-      </Button> */}
       </div>
     );
 }

@@ -41,7 +41,7 @@ export default function PunishmentModal({
           </DialogTitle>
         </DialogHeader>
         <p className="text-sm text-gray-600 mb-4">
-          Please specify the punishment for the student's poor performance:
+          Please specify the punishment for the student's performance:
         </p>
         <Textarea
           value={punishment}

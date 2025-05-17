@@ -7,8 +7,8 @@ const bcrypt = require('bcryptjs');
 // Registration
 router.post('/register', async (req, res) => {
   try {
-    const { phone, password } = req.body;
-    const user = new Teachers({ phone, password });
+    const { email, password } = req.body;
+    const user = new Teachers({ email, password });
     await user.save();
     res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
@@ -19,15 +19,15 @@ router.post('/register', async (req, res) => {
 // Login
 router.post('/login', async (req, res) => {
   try {
-    const { phone, password } = req.body; 
-    const user = await Teachers.findOne({ phone });
+    const { email, password } = req.body; 
+    const user = await Teachers.findOne({ email });
     if (!user) return res.status(400).json({ error: 'Invalid credentials' });
     console.log(user);
     
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
 
-    const token = jwt.sign({ id: user._id }, 'your_jwt_secret', { expiresIn: '1h' });
+    const token = jwt.sign({ id: user._id }, process.env.SESSION_SECRET, { expiresIn: '1d' });
     res.json({ token, userId: user._id, phone: user.phone });
   } catch (error) {
     res.status(500).json({ error: 'Login failed' });

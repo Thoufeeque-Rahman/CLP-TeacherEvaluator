@@ -18,7 +18,7 @@ import axios from "@/lib/axios";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
-  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { toast } = useToast();
   const { user, isLoading, login, register } = useAuth();
@@ -31,7 +31,7 @@ export default function AuthPage() {
   const handleSubmit = async (e: { preventDefault: () => void; }) => {
     e.preventDefault();
 
-    if (!phone || !password) {
+    if (!email || !password) {
       toast({
         title: "Missing fields",
         description: "Please fill in all required fields",
@@ -40,15 +40,15 @@ export default function AuthPage() {
       return;
     }
 
-    const payload = { phone, password };
+    const payload = { email, password };
 
     if (isLogin) {
-      await login({ phone: phone, password: password });
+      await login({ email: email, password: password });
       console.log(payload);
       
       
     } else {
-      await register({ phone: phone, password: password });
+      await register({ email: email, password: password });
     }
   };
 
@@ -112,7 +112,7 @@ export default function AuthPage() {
 
   const toggleMode = () => {
     setIsLogin(!isLogin);
-    setPhone("");
+    setEmail("");
     setPassword("");
   };
 
@@ -145,12 +145,12 @@ export default function AuthPage() {
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
-                  id="phone"
-                  placeholder="Enter your phone"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  id="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>
@@ -170,11 +170,12 @@ export default function AuthPage() {
               <Button
                 type="submit"
                 className="w-full"
+                disabled={isLoading}
                 
               >
                 {isLogin
-                  ? "Login"
-                  : "Register"}
+                  ? isLoading ? "Logging in..." : "Login"
+                  : isLoading ? "Registering..." : "Register"}
               </Button>
               {/* <p className="text-sm text-center text-gray-500">
                 {isLogin

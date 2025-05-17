@@ -74,4 +74,28 @@ router.post("/:id/students/:studentId", async (req, res) => {
   }
 });
 
+// Increase round number
+router.post("/:id/increaseRound", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const round = await Rounds.findById(id);
+    if (!round) return res.status(404).json({ message: "Round not found" });
+
+    round.roundNumber += 1;
+    round.studentsNotAsked = req.body.studentsNotAsked; // Assuming studentsNotAsked is an array of students roll numbers
+    round.studentsAsked = [];
+    round.startedAt = new Date();
+    round.endedAt = null;
+    
+    await round.save();
+    const rounds = await Rounds.find({
+      class: round.class,
+      subject: round.subject,
+    });
+    res.status(200).json(rounds);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

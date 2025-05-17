@@ -13,10 +13,12 @@ interface EvaluationScreenProps {
   totalStudents: number;
   studentsNot: number;
   currentEvaluation: "poor" | "good" | "great" | null;
+  setCurrentEvaluation: (evaluation: "poor" | "good" | "great") => void;
   onEvaluate: (value: "poor" | "good" | "great") => void;
   onSkip: () => void;
   onNext: (value: "poor" | "good" | "great") => void;
   onFinish: () => void;
+  setPunishmentModalOpen: (open: boolean) => void;
   isNextEnabled: boolean;
 }
 
@@ -26,24 +28,27 @@ export default function EvaluationScreen({
   totalStudents,
   studentsNot,
   currentEvaluation,
+  setCurrentEvaluation,
   onEvaluate,
   onSkip,
   onNext,
   onFinish,
+  setPunishmentModalOpen,
   isNextEnabled,
 }: EvaluationScreenProps) {
   const [studentKey, setStudentKey] = useState(0);
   const [status, setStatus] = useState<"great" | "good" | "poor">("great");
-  const [isPunishmentModalOpen, setPunishmentModalOpen] = useState(false);
 
   // Update key when student changes to trigger animation
   useEffect(() => {
     setStudentKey((prevKey) => prevKey + 1);
-  }, [currentStudent?.id]);
+  }, [currentStudent]);
+
+  var studentsAskedNumber = Math.abs(studentsNot - totalStudents) 
 
   const progressPercent =
     totalStudents > 0 // totalStudents
-      ? (studentsNot / totalStudents) * 100 // totalStudents
+      ? (studentsAskedNumber / totalStudents) * 100 // totalStudents
       : 0;
 
   return (
@@ -52,9 +57,9 @@ export default function EvaluationScreen({
       {/* Progress Indicator */}
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-sm text-gray-600">Evaluating Students</span>
+          <span className="text-sm text-gray-600">Evaluated Students</span>
           <span className="text-sm font-medium">
-            {totalStudents > 0 ? `${studentsNot} of ${totalStudents}` : "Loading..."} {/* totalStudents */}
+            {totalStudents > 0 ? `${studentsAskedNumber} of ${totalStudents}` : "Loading..."} {/* totalStudents */}
           </span>
         </div>
         <Progress value={progressPercent} className="w-full h-2.5" />
@@ -95,6 +100,7 @@ export default function EvaluationScreen({
             }`}
             onClick={() => {
               onEvaluate("good");
+              setCurrentEvaluation("good");
               setStatus("good");
             }}
           >
@@ -109,7 +115,8 @@ export default function EvaluationScreen({
               currentEvaluation === "poor" ? "ring-2 ring-red-500" : ""
             }`}
             onClick={() => {
-              onEvaluate("poor");
+              onEvaluate("poor")
+              setCurrentEvaluation("poor");
               setStatus("poor");
             }}
           >
@@ -122,7 +129,7 @@ export default function EvaluationScreen({
       </div>
 
       {/* Navigation Buttons */}
-      <div className="flex space-x-3 mb-3">
+      {/* <div className="flex space-x-3 mb-3">
         {status !== "great" && (
           <Button
             variant="destructive"
@@ -132,7 +139,7 @@ export default function EvaluationScreen({
             Punishment
           </Button>
         )}
-      </div>
+      </div> */}
       <div className="flex space-x-3">
         <Button
           variant="outline"
@@ -141,24 +148,24 @@ export default function EvaluationScreen({
         >
           Skip
         </Button>
-        <Button
+        {/* <Button
           className="flex-1 py-3 rounded-lg font-medium transition-colors"
-          onClick={onNext}
+          onClick={() => onEvaluate(status)}
           disabled={status === "great"}
         > 
           Next
+        </Button> */}
+        <Button
+          variant="outline"
+          className="flex-1 py-3 border border-destructive text-destructive rounded-lg font-medium hover:bg-destructive hover:text-white transition-colors"
+          onClick={onFinish} 
+        >
+          Finish Evaluation
         </Button>
       </div>
 
       {/* Finish Button */}
       <div className="mt-8">
-        <Button
-          variant="outline"
-          className="w-full py-3 border border-primary text-primary rounded-lg font-medium hover:bg-primary hover:text-white transition-colors"
-          onClick={onFinish}
-        >
-          Finish Evaluation
-        </Button>
       </div>
     </div>
   );
