@@ -68,7 +68,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-require("dotenv").config();
+const path = require("path"); // <-- Move this up!
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
 const app = express();
 
@@ -81,9 +82,11 @@ app.use(
 );
 app.use(express.json());
 
-// Connect to MongoDB
+app.use(express.static(path.join(__dirname, 'public')))
+
+// Connect to MongoDB 
 mongoose
-  .connect(process.env.MONGODB_URI + "my_dvt_db", {
+  .connect(process.env.MONGODB_URL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
@@ -112,6 +115,7 @@ app.get("/", (req, res) => {
 const studentRoutes = require("./routes/students");
 const teachersRoutes = require("./routes/teachers");
 const roundsRoutes = require("./routes/rounds");
+
 
 // Use routes
 app.use("/api/students", studentRoutes);
