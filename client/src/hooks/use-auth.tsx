@@ -40,7 +40,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const fetchUser = async (teacherID: number | undefined) => {
     try {
       const res = await axios.get(
-        `https://v6xrx50k-5000.inc1.devtunnels.ms/api/teachers/${teacherID}`,
+        `https://daily-viva-tracker.onrender.com/api/teachers/${teacherID}`,
         {
           withCredentials: true,
         }
@@ -59,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setIsLoading(true);
       const response = await axios.post(
-        "https://v6xrx50k-5000.inc1.devtunnels.ms/api/teachers/login",
+        "https://daily-viva-tracker.onrender.com/api/teachers/login",
         credentials,
         { withCredentials: true }
       );
@@ -90,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setIsLoading(true);
       const response = await axios.post(
-        "https://v6xrx50k-5000.inc1.devtunnels.ms/api/teachers/register",
+        "https://daily-viva-tracker.onrender.com/api/teachers/register",
         credentials,
         { withCredentials: true }
       );
@@ -115,7 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     try {
       await axios.post(
-        "https://v6xrx50k-5000.inc1.devtunnels.ms/api/logout",
+        "https://daily-viva-tracker.onrender.com/api/logout",
         {},
         { withCredentials: true }
       );

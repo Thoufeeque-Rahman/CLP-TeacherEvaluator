@@ -57,7 +57,7 @@ export default function Home() {
     console.log("Fetching students for class ID:", classId);
 
     const response = await fetch(
-      `https://v6xrx50k-5000.inc1.devtunnels.ms/api/students/class/${classId}`,
+      `https://daily-viva-tracker.onrender.com/api/students/class/${classId}`,
       {
         method: "GET",
         headers: {
@@ -79,7 +79,7 @@ export default function Home() {
     console.log("Creating round for subject:", subject);
 
     const response = await fetch(
-      `https://v6xrx50k-5000.inc1.devtunnels.ms/api/rounds/`,
+      `https://daily-viva-tracker.onrender.com/api/rounds/`,
       {
         method: "POST",
         headers: {
@@ -112,7 +112,7 @@ export default function Home() {
   const fetchRound = async (subject: SubjectInfo, students: Student[]) => {
     console.log("Fetching round for subject:", subject);
     const response = await fetch(
-      `https://v6xrx50k-5000.inc1.devtunnels.ms/api/rounds/${subject.subject}/${subject.class}`,
+      `https://daily-viva-tracker.onrender.com/api/rounds/${subject.subject}/${subject.class}`,
       {
         method: "GET",
         headers: {
@@ -157,7 +157,7 @@ export default function Home() {
   const increaseRound = async () => {
     console.log("Increasing round", rounds[0]);
     const response = await fetch(
-      `https://v6xrx50k-5000.inc1.devtunnels.ms/api/rounds/${rounds[0]._id}/increaseRound`,
+      `https://daily-viva-tracker.onrender.com/api/rounds/${rounds[0]._id}/increaseRound`,
       {
         method: "POST",
         headers: {
@@ -186,7 +186,7 @@ export default function Home() {
   const fetchStudent = async (studentId: string) => {
     console.log("Fetching student with ID:", studentId);
     const response = await fetch(
-      `https://v6xrx50k-5000.inc1.devtunnels.ms/api/students/${studentId}`,
+      `https://daily-viva-tracker.onrender.com/api/students/${studentId}`,
       {
         method: "GET",
         headers: {
@@ -255,7 +255,7 @@ export default function Home() {
     }
     console.log("Removing student from round:", studentId);
     const response = await fetch(
-      `https://v6xrx50k-5000.inc1.devtunnels.ms/api/rounds/${rounds[0]._id}/students/${studentId}`,
+      `https://daily-viva-tracker.onrender.com/api/rounds/${rounds[0]._id}/students/${studentId}`,
       {
         method: "POST",
         headers: {
@@ -357,7 +357,7 @@ export default function Home() {
 
     try {
       await fetch(
-        `https://v6xrx50k-5000.inc1.devtunnels.ms/api/students/dvtMarks/${currentStudent._id}`,
+        `https://daily-viva-tracker.onrender.com/api/students/dvtMarks/${currentStudent._id}`,
         {
           method: "POST",
           headers: {
