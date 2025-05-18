@@ -17,11 +17,11 @@ app.use(express.json());
 
 app.use(express.static(path.join(__dirname, 'public')))
 
-// Serve the frontend
-app.use(express.static(path.join(__dirname, "../dist"))); // <-- Serve built frontend
+
+app.use(express.static(path.join(__dirname, "dist", "public")));
 
 app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "../dist/index.html")); // <-- Catch-all for SPA routes
+  res.sendFile(path.resolve(__dirname, "dist", "public", "index.html"));
 });
 
 // Connect to MongoDB 
