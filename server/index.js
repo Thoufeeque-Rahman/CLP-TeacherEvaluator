@@ -2,27 +2,36 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path"); // <-- Move this up!
-require("dotenv").config();
+require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
 const app = express();
 
 // Middleware
 app.use(
   cors({
-    origin: "https://v6xrx50k-5173.inc1.devtunnels.ms", // Replace with your React app's URL
+    origin: "http://localhost:5000", // Replace with your React app's URL
     credentials: true,
   })
 );
 app.use(express.json());
 
-app.use(express.static(path.join(__dirname, 'public')))
-
-
-app.use(express.static(path.join(__dirname, "dist", "public")));
-
-app.get("*", (req, res) => {
-  res.sendFile(path.resolve(__dirname, "dist", "public", "index.html"));
+// Define routes
+app.get("/", (req, res) => {
+  res.send("API is running...");
 });
+
+// Import routes
+const studentRoutes = require("./routes/students");
+const teachersRoutes = require("./routes/teachers");
+const roundsRoutes = require("./routes/rounds");
+
+
+// Use routes
+app.use("/api/students", studentRoutes);
+app.use("/api/teachers", teachersRoutes);
+app.use("/api/rounds", roundsRoutes);
+
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Connect to MongoDB 
 mongoose
@@ -46,21 +55,16 @@ mongoose
 //   })
 // );
 
-// Define routes
-app.get("/", (req, res) => {
-  res.send("API is running...");
+// Then static files
+app.use(express.static(path.join(__dirname, '../client/dist')));
+
+const staticPath = path.join(__dirname, '../client/dist/index.html');
+console.log('Serving static files from:', staticPath);
+
+// THEN catch-all route
+app.get(/^(?!\/?api).*/, (req, res) => {
+  res.sendFile(path.join(__dirname, '../client/dist/index.html'));
 });
-
-// Import routes
-const studentRoutes = require("./routes/students");
-const teachersRoutes = require("./routes/teachers");
-const roundsRoutes = require("./routes/rounds");
-
-
-// Use routes
-app.use("/api/students", studentRoutes);
-app.use("/api/teachers", teachersRoutes);
-app.use("/api/rounds", roundsRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 5000;

@@ -30,21 +30,52 @@
 //   },
 // });
 
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import path from "path";
+// import { defineConfig } from "vite";
+// import react from "@vitejs/plugin-react";
+// import path from "path";
+
+// export default defineConfig({
+//   root: path.resolve(__dirname, "client"),
+//   plugins: [react()],
+//   resolve: {
+//     alias: {
+//       "@": path.resolve(__dirname, "client", "src"),
+//     },
+//   },
+//   build: {
+//     outDir: path.resolve(__dirname, "dist", "public"),
+//     emptyOutDir: true,
+//   },
+// });
+
+
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path, { resolve } from 'path';
 
 export default defineConfig({
-  root: path.resolve(__dirname, "client"),
   plugins: [react()],
+  build: {
+    outDir: resolve(__dirname, 'dist'),
+    emptyOutDir: true,
+    rollupOptions: {
+      input: {
+        main: resolve(__dirname, 'index.html')
+      }
+    }
+  },
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "client", "src"),
+      "@": path.resolve(__dirname, "src"),
     },
   },
-  build: {
-    outDir: path.resolve(__dirname, "dist", "public"),
-    emptyOutDir: true,
-  },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      }
+    }
+  }
 });
-
