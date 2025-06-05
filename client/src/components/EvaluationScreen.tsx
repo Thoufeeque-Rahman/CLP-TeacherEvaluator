@@ -158,21 +158,23 @@ export default function EvaluationScreen({
             </Button>
             <Button
               variant="outline"
-              className="flex-1 py-3 border border-yellow-600 text-yellow-600 rounded-lg font-medium hover:bg-yellow-600 hover:text-white transition-colors"
-              onClick={onEnd}
-            >
-              End Round
-            </Button>
-          </div>
-          <div className="flex w-full">
-            <Button
-              variant="outline"
               className="flex-1 py-3 border border-destructive text-destructive rounded-lg font-medium hover:bg-destructive hover:text-white transition-colors"
               onClick={onFinish}
             >
               Finish Evaluation
             </Button>
+            <div>
+              <Button
+                variant="outline"
+                className="flex-1 py-3 border border-yellow-600 text-yellow-600 rounded-full w-fit font-medium hover:bg-yellow-600 hover:text-white transition-colors"
+                onClick={onEnd}
+                disabled={true}
+              >
+                ER?
+              </Button>
+            </div>
           </div>
+          <div className="flex w-full"></div>
         </div>
       </div>
 

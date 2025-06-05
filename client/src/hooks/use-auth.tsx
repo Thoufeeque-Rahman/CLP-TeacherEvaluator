@@ -8,6 +8,7 @@ import {
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
 import { InsertUser, User as SelectUser } from "@shared/schema";
+// import { BASE_URL } from "../../../.env";
 
 type LoginData = {
   email: string;
@@ -37,17 +38,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     fetchUser(user?.id);
   }, []);
 
-  const baseUrl = "https://daily-viva-tracker.onrender.com";
-  // const baseUrl = "http://localhost:5000";
-  
+  // const baseUrl = "https://daily-viva-tracker.onrender.com";
+  const baseUrl = import.meta.env.BASE_URL;
+  const BASE_URL = import.meta.env.VITE_BASE_URL;
+  console.log("Base URL:", BASE_URL);
+
   const fetchUser = async (teacherID: number | undefined) => {
     try {
-      const res = await axios.get(
-        `${baseUrl}/api/teachers/${teacherID}`,
-        {
-          withCredentials: true,
-        }
-      );
+      const res = await axios.get(`${BASE_URL}/api/teachers/${teacherID}`, {
+        withCredentials: true,
+      });
       // console.log(res.data);
 
       setUser(res.data);
@@ -62,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setIsLoading(true);
       const response = await axios.post(
-        `${baseUrl}/api/teachers/login`,
+        `${BASE_URL}/api/teachers/login`,
         credentials,
         { withCredentials: true }
       );
@@ -74,7 +74,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       localStorage.setItem("token", data.token);
       await fetchUser(data.userId);
-      if (user) toast({ title: "Login successful", description: "Welcome back!" }); await fetchUser(data.userId);
+      if (user)
+        toast({ title: "Login successful", description: "Welcome back!" });
+      await fetchUser(data.userId);
       // fetchUser();
     } catch (err: any) {
       setError(err.message);
@@ -87,13 +89,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  }; 
+  };
 
   const register = async (credentials: InsertUser) => {
     try {
       setIsLoading(true);
       const response = await axios.post(
-        `${baseUrl}/api/teachers/register`,
+        `${BASE_URL}/api/teachers/register`,
         credentials,
         { withCredentials: true }
       );
@@ -117,11 +119,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      await axios.post(
-        `${baseUrl}/api/logout`,
-        {},
-        { withCredentials: true }
-      );
+      await axios.post(`${BASE_URL}/api/logout`, {}, { withCredentials: true });
       setUser(null);
       localStorage.removeItem("token");
       toast({ title: "Logged out successfully" });

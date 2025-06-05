@@ -9,7 +9,7 @@ const app = express();
 // Middleware
 app.use(
   cors({
-    origin: "https://daily-viva-tracker.onrender.com", // Replace with your React app's URL
+    origin: process.env.VITE_FRONT_URL, // Replace with your React app's URL
     // origin: "http://localhost:5173", // Replace with your React app's URL
     credentials: true,
   })

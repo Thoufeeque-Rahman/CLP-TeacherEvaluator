@@ -50,11 +50,11 @@ export default function Home() {
       fetchRound(selectedSubject, students);
       // setActiveScreen("evaluation");
     }
-  };
-
+  }; 
+ 
   // const baseUrl = "http://localhost:5000"; // Change to your backend URL
-  const baseUrl = "https://daily-viva-tracker.onrender.com"; // Change to your backend URL
-
+  const baseUrl = import.meta.env.VITE_BASE_URL; // Change to your backend URL
+ 
   // Fetch students based on selected class
   const fetchStudents = async (classId: number) => {
     console.log("Fetching students for class ID:", classId);
