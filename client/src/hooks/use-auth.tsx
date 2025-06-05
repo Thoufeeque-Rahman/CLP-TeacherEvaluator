@@ -37,8 +37,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     fetchUser(user?.id);
   }, []);
 
-  // const baseUrl = "https://daily-viva-tracker.onrender.com";
-  const baseUrl = "http://localhost:5000";
+  const baseUrl = "https://daily-viva-tracker.onrender.com";
+  // const baseUrl = "http://localhost:5000";
   
   const fetchUser = async (teacherID: number | undefined) => {
     try {
