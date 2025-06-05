@@ -52,12 +52,15 @@ export default function Home() {
     }
   };
 
+  const baseUrl = "http://localhost:5000"; // Change to your backend URL
+  // const baseUrl = "https://daily-viva-tracker.onrender.com"; // Change to your backend URL
+
   // Fetch students based on selected class
   const fetchStudents = async (classId: number) => {
     console.log("Fetching students for class ID:", classId);
 
     const response = await fetch(
-      `https://daily-viva-tracker.onrender.com/api/students/class/${classId}`,
+      `${baseUrl}/api/students/class/${classId}`,
       {
         method: "GET",
         headers: {
@@ -79,7 +82,7 @@ export default function Home() {
     console.log("Creating round for subject:", subject);
 
     const response = await fetch(
-      `https://daily-viva-tracker.onrender.com/api/rounds/`,
+      `${baseUrl}/api/rounds/`,
       {
         method: "POST",
         headers: {
@@ -112,7 +115,7 @@ export default function Home() {
   const fetchRound = async (subject: SubjectInfo, students: Student[]) => {
     console.log("Fetching round for subject:", subject);
     const response = await fetch(
-      `https://daily-viva-tracker.onrender.com/api/rounds/${subject.subject}/${subject.class}`,
+      `${baseUrl}/api/rounds/${subject.subject}/${subject.class}`,
       {
         method: "GET",
         headers: {
@@ -157,8 +160,8 @@ export default function Home() {
   const increaseRound = async () => {
     console.log("Increasing round", rounds[0]);
     const response = await fetch(
-      `https://daily-viva-tracker.onrender.com/api/rounds/${rounds[0]._id}/increaseRound`,
-      {
+      `${baseUrl}/api/rounds/${rounds[0]._id}/increaseRound`,
+      {  
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -186,7 +189,7 @@ export default function Home() {
   const fetchStudent = async (studentId: string) => {
     console.log("Fetching student with ID:", studentId);
     const response = await fetch(
-      `https://daily-viva-tracker.onrender.com/api/students/${studentId}`,
+      `${baseUrl}/api/students/${studentId}`,
       {
         method: "GET",
         headers: {
@@ -255,7 +258,7 @@ export default function Home() {
     }
     console.log("Removing student from round:", studentId);
     const response = await fetch(
-      `https://daily-viva-tracker.onrender.com/api/rounds/${rounds[0]._id}/students/${studentId}`,
+      `${baseUrl}/api/rounds/${rounds[0]._id}/students/${studentId}`,
       {
         method: "POST",
         headers: {
@@ -352,12 +355,31 @@ export default function Home() {
     });
   };
 
+  const handleEnd = () => {
+    // End the current evaluation session and increase the round
+    increaseRound().then(async (currentStudentId) => {
+      if (typeof currentStudentId === "string") {
+        const studentData = await fetchStudent(currentStudentId);
+        setCurrentStudent(studentData);
+      } else {
+        setCurrentStudent({} as Student);
+      }
+      setCurrentEvaluation(null);
+      setCurrentStudentIndex(0);
+      toast({
+        title: "Round ended, new round started",
+        description: "You can now evaluate the next student.",
+      });
+    });
+  };
+  
+
   const submitEvaluation = async (mark: number, punishment?: string) => {
     if (!selectedSubject || !currentStudent) return;
 
     try {
       await fetch(
-        `https://daily-viva-tracker.onrender.com/api/students/dvtMarks/${currentStudent._id}`,
+        `${baseUrl}/api/students/dvtMarks/${currentStudent._id}`,
         {
           method: "POST",
           headers: {
@@ -394,7 +416,7 @@ export default function Home() {
         onHomeClick={handleGoHome}
       />
 
-      <main className="relative">
+      <main className="relative min-h-[90vh]">
         {activeScreen === "start" ? (
           <StartScreen
             selectedClass={selectedClass}
@@ -415,6 +437,7 @@ export default function Home() {
             onEvaluate={handleEvaluate}
             onSkip={handleSkip}
             onNext={handleNext}
+            onEnd={handleEnd}
             onFinish={handleFinish}
             setPunishmentModalOpen={setPunishmentModalOpen}
             isNextEnabled={!!currentEvaluation && currentEvaluation === "great"}

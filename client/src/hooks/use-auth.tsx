@@ -36,11 +36,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     fetchUser(user?.id);
   }, []);
+
+  // const baseUrl = "https://daily-viva-tracker.onrender.com";
+  const baseUrl = "http://localhost:5000";
   
   const fetchUser = async (teacherID: number | undefined) => {
     try {
       const res = await axios.get(
-        `https://daily-viva-tracker.onrender.com/api/teachers/${teacherID}`,
+        `${baseUrl}/api/teachers/${teacherID}`,
         {
           withCredentials: true,
         }
@@ -59,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setIsLoading(true);
       const response = await axios.post(
-        "https://daily-viva-tracker.onrender.com/api/teachers/login",
+        `${baseUrl}/api/teachers/login`,
         credentials,
         { withCredentials: true }
       );
@@ -90,7 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setIsLoading(true);
       const response = await axios.post(
-        "https://daily-viva-tracker.onrender.com/api/teachers/register",
+        `${baseUrl}/api/teachers/register`,
         credentials,
         { withCredentials: true }
       );
@@ -115,7 +118,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = async () => {
     try {
       await axios.post(
-        "https://daily-viva-tracker.onrender.com/api/logout",
+        `${baseUrl}/api/logout`,
         {},
         { withCredentials: true }
       );
