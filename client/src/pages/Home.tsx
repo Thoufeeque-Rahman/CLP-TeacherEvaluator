@@ -50,25 +50,22 @@ export default function Home() {
       fetchRound(selectedSubject, students);
       // setActiveScreen("evaluation");
     }
-  }; 
- 
+  };
+
   // const baseUrl = "http://localhost:5000"; // Change to your backend URL
   const baseUrl = import.meta.env.VITE_BASE_URL; // Change to your backend URL
- 
+
   // Fetch students based on selected class
   const fetchStudents = async (classId: number) => {
     console.log("Fetching students for class ID:", classId);
 
-    const response = await fetch(
-      `${baseUrl}/api/students/class/${classId}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      }
-    );
+    const response = await fetch(`${baseUrl}/api/students/class/${classId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
     if (!response.ok) {
       throw new Error("Failed to fetch students");
     }
@@ -81,23 +78,20 @@ export default function Home() {
   const createRound = async (subject: SubjectInfo, students: Student[]) => {
     console.log("Creating round for subject:", subject);
 
-    const response = await fetch(
-      `${baseUrl}/api/rounds/`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          studentsNotAsked: students.map((student) => student._id),
-          subject: subject.subject,
-          class: subject.class,
-          totalStudents: students.length,
-          startedAt: new Date(),
-        }),
-      }
-    );
+    const response = await fetch(`${baseUrl}/api/rounds/`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        studentsNotAsked: students.map((student) => student._id),
+        subject: subject.subject,
+        class: subject.class,
+        totalStudents: students.length,
+        startedAt: new Date(),
+      }),
+    });
     if (!response.ok) {
       console.log("Failed to create round:", response.statusText);
       throw new Error("Failed to create round" + response.statusText);
@@ -161,7 +155,7 @@ export default function Home() {
     console.log("Increasing round", rounds[0]);
     const response = await fetch(
       `${baseUrl}/api/rounds/${rounds[0]._id}/increaseRound`,
-      {  
+      {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -170,7 +164,6 @@ export default function Home() {
           studentsNotAsked: students.map((student) => student._id),
         }),
         credentials: "include",
-
       }
     );
     if (!response.ok) {
@@ -184,20 +177,17 @@ export default function Home() {
     setActiveScreen("evaluation");
     console.log("Random Student:", currentStudent);
     return currentStudent;
-  }
+  };
 
   const fetchStudent = async (studentId: string) => {
     console.log("Fetching student with ID:", studentId);
-    const response = await fetch(
-      `${baseUrl}/api/students/${studentId}`,
-      {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-      }
-    );
+    const response = await fetch(`${baseUrl}/api/students/${studentId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    });
     if (!response.ok) {
       console.log("Failed to fetch student:", response.statusText);
       throw new Error("Failed to fetch student" + response.statusText);
@@ -372,27 +362,23 @@ export default function Home() {
       });
     });
   };
-  
 
   const submitEvaluation = async (mark: number, punishment?: string) => {
     if (!selectedSubject || !currentStudent) return;
 
     try {
-      await fetch(
-        `${baseUrl}/api/students/dvtMarks/${currentStudent._id}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            subject: selectedSubject.subject,
-            mark,
-            punishment,
-          }),
-          credentials: "include",
-        }
-      );
+      await fetch(`${baseUrl}/api/students/dvtMarks/${currentStudent._id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          subject: selectedSubject.subject,
+          mark,
+          punishment,
+        }),
+        credentials: "include",
+      });
     } catch (error) {
       console.error("Failed to submit evaluation:", error);
       toast({
@@ -406,7 +392,7 @@ export default function Home() {
   };
 
   return (
-    <div className="mx-auto max-w-md bg-white min-h-screen shadow-lg relative overflow-hidden">
+    <div className="mx-auto max-w-md bg-white min-h-screen shadow-lg relative h-svh flex flex-col">
       <Header
         selectedClass={selectedClass?.name}
         selectedSubject={
@@ -416,7 +402,7 @@ export default function Home() {
         onHomeClick={handleGoHome}
       />
 
-      <main className="relative min-h-[90vh]">
+      <main className="relative h-full">
         {activeScreen === "start" ? (
           <StartScreen
             selectedClass={selectedClass}
@@ -435,6 +421,8 @@ export default function Home() {
             currentEvaluation={currentEvaluation}
             setCurrentEvaluation={setCurrentEvaluation}
             onEvaluate={handleEvaluate}
+            allStudents={students}
+            onStudentSelect={setCurrentStudent}
             onSkip={handleSkip}
             onNext={handleNext}
             onEnd={handleEnd}

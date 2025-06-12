@@ -9,29 +9,31 @@ import AuthPage from "@/pages/auth-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { AuthProvider } from "@/hooks/use-auth";
 import Dashboard from "./pages/admin/dashboard";
+import History from "@/pages/history";
+import Performance from "@/pages/performance";
 
 function Router() {
   return ( // TODO: Add a loading state
     <Switch>
       <ProtectedRoute path="/" component={Home} />
+      <ProtectedRoute path="/history" component={History} />
+      <ProtectedRoute path="/performance" component={Performance} />
       <Route path="/auth" component={AuthPage} />
       <Route path="/admin/*" component={Dashboard}/>
       <Route component={NotFound} />
     </Switch>
   );
-} 
+}
 
-function App() {
+export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <TooltipProvider>
-          <Toaster />
           <Router />
+          <Toaster />
         </TooltipProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
 }
-
-export default App;

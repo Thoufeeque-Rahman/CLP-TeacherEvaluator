@@ -11,6 +11,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useEffect } from "react";
 import { Redirect } from "wouter";
+import Navigation from "./Navigation";
 
 interface HeaderProps {
   selectedClass?: string;
@@ -25,35 +26,38 @@ export default function Header({
   showContext,
   onHomeClick,
 }: HeaderProps) {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const handleLogout = () => {
-    // logoutMutation.mutate();
+    logout();
   };
 
   useEffect(() => {
-    // console.log(user);
+    console.log(user); 
   }, [user]);
 
   if (!user) {
     <Redirect to="/auth" />; 
-
   }
 
   return (
     <header className="bg-primary text-white p-4 shadow-md relative z-10">
       <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-xl font-bold">Daily Viva Tracker</h1>
-          <div
-            className={`text-sm mt-1 transition-opacity duration-300 ${
-              showContext ? "opacity-100" : "opacity-0"
-            }`}
-          >
-            <span>{selectedSubject} </span>
-          </div> 
+        <div className="flex items-center gap-2">
+          <Navigation />
+          <div>
+            <h1 className="text-xl font-bold">Daily Viva Tracker</h1>
+            <div
+              className={`text-sm mt-1 transition-opacity duration-300 ${
+                showContext ? "opacity-100" : "opacity-0"
+              }`}
+            >
+              <span>{selectedSubject} </span>
+            </div> 
+          </div>
         </div>
-        <div className="flex items-center space-x-4">
+        
+        <div className="flex items-center gap-4">
           <button
             onClick={onHomeClick}
             className={`text-white transition-opacity duration-300 ${
@@ -84,7 +88,6 @@ export default function Header({
                 <DropdownMenuItem
                   className="cursor-pointer text-red-600 focus:text-red-600"
                   onClick={handleLogout}
-                  // disabled={logoutMutation.isPending}
                 >
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>{"Logout"}</span>

@@ -28,7 +28,7 @@ export default function AuthPage() {
     return <Redirect to="/" />;
   }
 
-  const handleSubmit = async (e: { preventDefault: () => void; }) => {
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
 
     if (!email || !password) {
@@ -45,8 +45,6 @@ export default function AuthPage() {
     if (isLogin) {
       await login({ email: email, password: password });
       console.log(payload);
-      
-      
     } else {
       await register({ email: email, password: password });
     }
@@ -125,7 +123,7 @@ export default function AuthPage() {
             <GraduationCap className="h-8 w-8 text-white" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900">
-            Teacher Evaluation Platform
+            Daily Viva Tracker
           </h1>
           <p className="text-gray-500 mt-1">
             Sign in to manage student evaluations
@@ -167,15 +165,14 @@ export default function AuthPage() {
               </div>
             </CardContent>
             <CardFooter className="flex flex-col space-y-3">
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={isLoading}
-                
-              >
+              <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLogin
-                  ? isLoading ? "Logging in..." : "Login"
-                  : isLoading ? "Registering..." : "Register"}
+                  ? isLoading
+                    ? "Logging in..."
+                    : "Login"
+                  : isLoading
+                  ? "Registering..."
+                  : "Register"}
               </Button>
               {/* <p className="text-sm text-center text-gray-500">
                 {isLogin

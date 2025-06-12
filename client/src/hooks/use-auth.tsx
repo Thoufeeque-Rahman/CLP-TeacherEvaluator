@@ -22,6 +22,7 @@ type AuthContextType = {
   login: (credentials: LoginData) => Promise<void>;
   register: (credentials: InsertUser) => Promise<void>;
   logout: () => Promise<void>;
+  checkAuth: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -29,34 +30,40 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<SelectUser | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [teacherId, setTeacherId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  // Load user on mount (optional: based on token/cookie)
-  useEffect(() => {
-    fetchUser(user?.id);
-  }, []);
-
-  // const baseUrl = "https://daily-viva-tracker.onrender.com";
-  const baseUrl = import.meta.env.BASE_URL;
   const BASE_URL = import.meta.env.VITE_BASE_URL;
-  console.log("Base URL:", BASE_URL);
 
-  const fetchUser = async (teacherID: number | undefined) => {
+  // Check authentication status on mount and after window focus
+  const checkAuth = async () => {
     try {
-      const res = await axios.get(`${BASE_URL}/api/teachers/${teacherID}`, {
+      const response = await axios.get(`${BASE_URL}/api/teachers/me`, {
         withCredentials: true,
       });
-      // console.log(res.data);
-
-      setUser(res.data);
+      console.log("User1:", response.data);
+      setUser(response.data);
+      return response.data;
     } catch (err) {
       setUser(null);
+      return null;
     } finally {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    checkAuth();
+
+    // Check auth status when window regains focus
+    const onFocus = () => {
+      checkAuth();
+    };
+    window.addEventListener('focus', onFocus);
+    return () => {
+      window.removeEventListener('focus', onFocus);
+    };
+  }, []);
 
   const login = async (credentials: LoginData) => {
     try {
@@ -66,26 +73,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         credentials,
         { withCredentials: true }
       );
-      const data = response.data;
-      // console.log(data);
-      setUser(data.user);
-      setTeacherId(data.userId);
-      // console.log(data.userId);
-
-      localStorage.setItem("token", data.token);
-      await fetchUser(data.userId);
-      if (user)
-        toast({ title: "Login successful", description: "Welcome back!" });
-      await fetchUser(data.userId);
-      // fetchUser();
+      const userData = response.data;
+      setUser(userData);
+      toast({ 
+        title: "Login successful", 
+        description: "Welcome back!" 
+      });
     } catch (err: any) {
-      setError(err.message);
+      setError(err.response?.data?.message || "Login failed");
       toast({
         title: "Login failed",
-        description: err.message,
+        description: err.response?.data?.message || "Invalid credentials",
         variant: "destructive",
       });
-      console.error("Login error:", err);
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -95,23 +96,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       setIsLoading(true);
       const response = await axios.post(
-        `${BASE_URL}/api/teachers/register`,
+        `${BASE_URL}/api/register`,
         credentials,
         { withCredentials: true }
       );
-      const data = response.data;
-      setUser(data.user);
+      const userData = response.data;
+      setUser(userData);
       toast({
         title: "Registration successful",
-        description: "You can now log in.",
+        description: "You have been automatically logged in.",
       });
     } catch (err: any) {
-      setError(err.message);
+      setError(err.response?.data?.message || "Registration failed");
       toast({
         title: "Registration failed",
-        description: err.message,
+        description: err.response?.data?.message || "An error occurred",
         variant: "destructive",
       });
+      throw err;
     } finally {
       setIsLoading(false);
     }
@@ -119,23 +121,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
-      await axios.post(`${BASE_URL}/api/logout`, {}, { withCredentials: true });
+      await axios.post(
+        `${BASE_URL}/api/teachers/logout`, 
+        {}, 
+        { withCredentials: true }
+      );
       setUser(null);
-      localStorage.removeItem("token");
       toast({ title: "Logged out successfully" });
     } catch (err: any) {
-      setError(err.message);
+      setError(err.response?.data?.message || "Logout failed");
       toast({
         title: "Logout failed",
-        description: err.message,
+        description: err.response?.data?.message || "An error occurred",
         variant: "destructive",
       });
+      throw err;
     }
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, isLoading, error, login, register, logout }}
+      value={{ user, isLoading, error, login, register, logout, checkAuth }}
     >
       {children}
     </AuthContext.Provider>
