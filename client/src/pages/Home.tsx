@@ -395,7 +395,9 @@ export default function Home() {
     <div className="mx-auto max-w-md bg-white min-h-screen shadow-lg relative h-svh flex flex-col">
       <Header
         selectedClass={selectedClass?.name}
-        selectedSubject={selectedSubject ? `${selectedSubject.subject} ${selectedSubject.class}` : undefined}
+        selectedSubject={
+          selectedSubject?.subject + " " + selectedSubject?.class
+        }
         showContext={activeScreen === "evaluation"}
         onHomeClick={handleGoHome}
       />

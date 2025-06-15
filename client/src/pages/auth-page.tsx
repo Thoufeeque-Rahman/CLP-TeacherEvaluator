@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useLocation } from "wouter";
+import { Redirect } from "wouter";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { GraduationCap } from "lucide-react";
+import axios from "@/lib/axios";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -21,15 +22,13 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const { toast } = useToast();
   const { user, isLoading, login, register } = useAuth();
-  const [, navigate] = useLocation();
 
   // Redirect if already logged in
   if (user) {
-    navigate("/");
-    return null;
+    return <Redirect to="/" />;
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
 
     if (!email || !password) {
@@ -41,29 +40,73 @@ export default function AuthPage() {
       return;
     }
 
-    try {
-      if (isLogin) {
-        await login({ email, password });
-        toast({
-          title: "Login successful",
-          description: "Welcome back!",
-        });
-      } else {
-        await register({ email, password });
-        toast({
-          title: "Registration successful",
-          description: "You can now log in with your credentials",
-        });
-        setIsLogin(true);
-      }
-    } catch (error: any) {
-      toast({
-        title: isLogin ? "Login failed" : "Registration failed",
-        description: error.response?.data?.error || error.message,
-        variant: "destructive",
-      });
+    const payload = { email, password };
+
+    if (isLogin) {
+      await login({ email: email, password: password });
+      console.log(payload);
+    } else {
+      await register({ email: email, password: password });
     }
   };
+
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+
+  //   if (!phone || !password) {
+  //     toast({
+  //       title: "Missing fields",
+  //       description: "Please fill in all required fields",
+  //       variant: "destructive",
+  //     });
+  //     return;
+  //   }
+
+  //   try {
+  //     const endpoint = isLogin ? "/api/teachers/login" : "/api/teachers/register";
+  //     const response = await axios.post(
+  //       `http://localhost:5000${endpoint}`,
+  //       { phone, password },
+  //       { withCredentials: true }
+  //     );
+  //     console.log(response.data.userId);
+
+  //     if (isLogin) {
+  //       // Store the token in local storage or a cookie
+  //       const { token } = response.data.token;
+  //       localStorage.setItem("token", token);
+
+  //       // Redirect or update UI as needed
+  //       toast({
+  //         title: "Login successful",
+  //         description: "Welcome back!",
+  //         variant: "default",
+  //       });
+
+  //       <Redirect to="/" />;
+  //     } else {
+  //       toast({
+  //         title: "Registration successful",
+  //         description: "You can now log in with your credentials",
+  //         variant: "default",
+  //       });
+  //       setIsLogin(true);
+  //     }
+  //   } catch (error) {
+  //     toast({
+  //       title: isLogin ? "Login failed" : "Registration failed",
+  //       description: (error as any).response?.data?.error || (error as any).message,
+  //       variant: "destructive",
+  //     });
+  //   }
+  // };
+
+  // axios
+  //   .get("http://localhost:5000/api/students", { withCredentials: true })
+  //   .then((response) => {
+  //     // Handle the fetched data
+  //     console.log(response.data);
+  //   });
 
   const toggleMode = () => {
     setIsLogin(!isLogin);
@@ -131,7 +174,7 @@ export default function AuthPage() {
                   ? "Registering..."
                   : "Register"}
               </Button>
-              <p className="text-sm text-center text-gray-500">
+              {/* <p className="text-sm text-center text-gray-500">
                 {isLogin
                   ? "Don't have an account?"
                   : "Already have an account?"}
@@ -142,7 +185,7 @@ export default function AuthPage() {
                 >
                   {isLogin ? "Register" : "Login"}
                 </button>
-              </p>
+              </p> */}
             </CardFooter>
           </form>
         </Card>

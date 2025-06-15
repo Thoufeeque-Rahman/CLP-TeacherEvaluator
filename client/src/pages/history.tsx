@@ -46,7 +46,7 @@ export default function History() {
     const fetchStudents = async () => {
       try {
         const response = await fetch(`${baseUrl}/api/students`, {
-          credentials: "include",
+          credentials: "include"
         });
         if (!response.ok) throw new Error("Failed to fetch students");
         const data = await response.json();
@@ -64,26 +64,26 @@ export default function History() {
 
     const subjectHistory: SubjectHistory = {
       subject: selectedSubject,
-      evaluations: [],
+      evaluations: []
     };
 
-    students.forEach((student) => {
+    students.forEach(student => {
       student.dvtMarks
-        .filter((mark) => mark.subject === selectedSubject)
-        .forEach((mark) => {
+        .filter(mark => mark.subject === selectedSubject)
+        .forEach(mark => {
           subjectHistory.evaluations.push({
             studentName: student.name,
             rollNumber: student.rollNumber,
             mark: mark.mark,
             date: mark.date,
-            punishment: mark.punishment,
+            punishment: mark.punishment
           });
         });
     });
 
     // Sort by date, most recent first
-    subjectHistory.evaluations.sort(
-      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    subjectHistory.evaluations.sort((a, b) => 
+      new Date(b.date).getTime() - new Date(a.date).getTime()
     );
 
     setHistory(subjectHistory);
@@ -91,27 +91,19 @@ export default function History() {
 
   const getMarkLabel = (mark: number) => {
     switch (mark) {
-      case 0:
-        return "Poor";
-      case 1:
-        return "Good";
-      case 2:
-        return "Great";
-      default:
-        return "Unknown";
+      case 0: return "Poor";
+      case 1: return "Good";
+      case 2: return "Great";
+      default: return "Unknown";
     }
   };
 
   const getMarkColor = (mark: number) => {
     switch (mark) {
-      case 0:
-        return "text-red-600";
-      case 1:
-        return "text-yellow-600";
-      case 2:
-        return "text-green-600";
-      default:
-        return "text-gray-600";
+      case 0: return "text-red-600";
+      case 1: return "text-yellow-600";
+      case 2: return "text-green-600";
+      default: return "text-gray-600";
     }
   };
 
@@ -120,40 +112,22 @@ export default function History() {
       <Header showContext={false} onHomeClick={() => {}} />
       <main className="flex-1 p-6">
         <h1 className="text-2xl font-bold mb-6">Evaluation History</h1>
-
+        
         {/* Subject Selection */}
         <div className="mb-6">
-          <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+          <Select
+            value={selectedSubject}
+            onValueChange={setSelectedSubject}
+          >
             <SelectTrigger className="w-full">
               <SelectValue placeholder="Select a subject" />
             </SelectTrigger>
-            {/* <SelectContent>
+            <SelectContent>
               {user?.subjectsTaught?.map((subject, index) => (
                 <SelectItem key={`${subject}-${index}`} value={subject}>
                   {subject}
                 </SelectItem>
               ))}
-            </SelectContent> */}
-            <SelectContent>
-              {user?.subjectsTaught?.map((subject: any, index: any) => {
-                if (typeof subject === "string") {
-                  return (
-                    <SelectItem key={`${subject}-${index}`} value={subject}>
-                      {subject} 
-                    </SelectItem>
-                  );
-                } else if (typeof subject === "object" && subject !== null) {
-                  // Compose a unique value and label for the object
-                  const label = `${subject.subject} ${subject.class}`;
-                  const value = JSON.stringify(subject); // or use subject._id if unique
-                  return (
-                    <SelectItem key={subject._id || index} value={value}>
-                      {label}
-                    </SelectItem>
-                  );
-                }
-                return null;
-              })}
             </SelectContent>
           </Select>
         </div>
@@ -167,19 +141,13 @@ export default function History() {
                   <div className="flex justify-between items-start">
                     <div>
                       <h3 className="font-medium">{evaluation.studentName}</h3>
-                      <p className="text-sm text-gray-500">
-                        Roll No: {evaluation.rollNumber}
-                      </p>
+                      <p className="text-sm text-gray-500">Roll No: {evaluation.rollNumber}</p>
                       <p className="text-sm text-gray-500">
                         {format(new Date(evaluation.date), "PPp")}
                       </p>
                     </div>
                     <div className="text-right">
-                      <p
-                        className={`font-medium ${getMarkColor(
-                          evaluation.mark
-                        )}`}
-                      >
+                      <p className={`font-medium ${getMarkColor(evaluation.mark)}`}>
                         {getMarkLabel(evaluation.mark)}
                       </p>
                       {evaluation.punishment && (
@@ -192,7 +160,7 @@ export default function History() {
                 </CardContent>
               </Card>
             ))}
-
+            
             {history.evaluations.length === 0 && (
               <p className="text-center text-gray-500 py-8">
                 No evaluations found for this subject
@@ -209,4 +177,4 @@ export default function History() {
       </main>
     </div>
   );
-}
+} 

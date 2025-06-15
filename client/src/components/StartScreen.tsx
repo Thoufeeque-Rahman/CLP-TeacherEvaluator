@@ -4,12 +4,6 @@ import { ClassInfo, SubjectInfo } from "@/pages/Home";
 import { useAuth } from "@/hooks/use-auth";
 import { Redirect } from "wouter";
 
-interface SubjectTaught {
-  _id: string;
-  subject: string;
-  class: number;
-}
-
 interface StartScreenProps {
   selectedClass: ClassInfo | null;
   selectedSubject: SubjectInfo | null;
@@ -35,55 +29,52 @@ export default function StartScreen({
   };
   const { user } = useAuth();
 
-  if (user) {
+  if (user)
     console.log("User:", user);
-    console.log("Subjects Taught:", user.subjectsTaught);
-  }
   if (!user) {
     return <Redirect to="/auth" />;
   }
   
-  return (
-    <div className="p-6 transition-all duration-300 transform">
-      <div className="text-center mb-8 mt-4">
-        <div className="bg-primary inline-block p-3 rounded-full mb-4">
-          <GraduationCap className="text-white w-6 h-6" />
+    return (
+      <div className="p-6 transition-all duration-300 transform">
+        <div className="text-center mb-8 mt-4">
+          <div className="bg-primary inline-block p-3 rounded-full mb-4">
+            <GraduationCap className="text-white w-6 h-6" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800">
+            Daily Viva Tracker
+          </h2>
+          <p className="text-gray-600 mt-2">
+            Select a lesson to begin
+          </p>
+          <p className="font-medium mt-2">Hey, {user.name.toUpperCase()}</p>
         </div>
-        <h2 className="text-2xl font-bold text-gray-800">
-          Daily Viva Tracker
-        </h2>
-        <p className="text-gray-600 mt-2">
-          Select a lesson to begin
-        </p>
-        <p className="font-medium mt-2">Hey, {user.name.toUpperCase()}</p>
-      </div>
 
-      {/* Subject Selection */}
-      <div className="mb-8">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Select Lesson
-        </label>
-        <div className="grid grid-cols-2 gap-3">
-          {(user.subjectsTaught as SubjectTaught[])?.map((subject, index) => (
-            <button
-              key={subject._id}
-              className={`border border-gray-200 rounded-lg py-3 px-4 text-center hover:bg-gray-50 focus:outline-none transition-all`}
-              style={{
-                backgroundColor: `hsl(${(index * 40) % 360}, 70%, 90%)`,
-                borderColor: `hsl(${(index * 40) % 360}, 70%, 50%)`,
-              }}
-              onClick={() => {
-                onSubjectSelect({ 
-                  subject: subject.subject, 
-                  class: subject.class 
-                });
-              }}
-            >
-              {`${subject.subject} ${subject.class}`}
-            </button>
-          ))}
+        {/* Subject Selection */}
+        <div className="mb-8">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Select Lesson
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            {user.subjectsTaught?.map((subject, index) => (
+              <button
+                key={index}
+                className={`border border-gray-200 rounded-lg py-3 px-4 text-center hover:bg-gray-50 focus:outline-none transition-all`}
+                style={{
+                  backgroundColor: `hsl(${(index * 40) % 360}, 70%, 90%)`,
+                  borderColor: `hsl(${(index * 40) % 360}, 70%, 50%)`,
+                }}
+                onClick={() => {
+                  onSubjectSelect({ subject: subject.subject, class: subject.class });
+                  // onProceed();
+                }}
+              >
+                {subject.subject} {subject.class}
+              </button>
+            ))}
+          </div>
         </div>
+
       </div>
-    </div>
-  );
+    );
 }
