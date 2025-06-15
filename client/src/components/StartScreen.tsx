@@ -37,17 +37,17 @@ export default function StartScreen({
   
     return (
       <div className="p-6 transition-all duration-300 transform">
-        <div className="text-center mb-8 mt-4">
-          <div className="bg-primary inline-block p-3 rounded-full mb-4">
+        <div className="text-center mb-8 mt-4"> 
+          <div className="bg-blue-500 inline-block p-3 rounded-full mb-4">
             <GraduationCap className="text-white w-6 h-6" />
           </div>
-          <h2 className="text-2xl font-bold text-gray-800">
+          <h2 className="text-2xl font-bold text-blue-600">
             Daily Viva Tracker
           </h2>
-          <p className="text-gray-600 mt-2">
+          <p className="text-gray-600">
             Select a lesson to begin
           </p>
-          <p className="font-medium mt-2">Hey, {user.name.toUpperCase()}</p>
+          <p className="font-medium mt-2 text-blue-600">Hey, {user.name.toUpperCase()}</p>
         </div>
 
         {/* Subject Selection */}

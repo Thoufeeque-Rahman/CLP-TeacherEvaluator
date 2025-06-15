@@ -218,8 +218,9 @@ export default function EvaluationScreen({
             }}
           >
             <div className="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center mb-2">
-              <Star className="text-white w-5 h-5" />
-            </div>
+              {/* <Star className="text-white w-5 h-5" /> */}
+              <span className="text-white text-3xl">🙂</span>
+            </div>  
             <span className="text-sm font-medium">Great</span>
           </button>
 
@@ -234,7 +235,8 @@ export default function EvaluationScreen({
             }}
           >
             <div className="w-12 h-12 rounded-full bg-yellow-400 flex items-center justify-center mb-2">
-              <ThumbsUp className="text-white w-5 h-5" />
+              {/* <ThumbsUp className="text-white w-5 h-5" /> */}
+              <span className="text-white text-3xl">😐</span>
             </div>
             <span className="text-sm font-medium">Good</span>
           </button>
@@ -250,7 +252,8 @@ export default function EvaluationScreen({
             }}
           >
             <div className="w-12 h-12 rounded-full bg-destructive flex items-center justify-center mb-2">
-              <ThumbsDown className="text-white w-5 h-5" />
+              {/* <ThumbsDown className="text-white w-5 h-5" /> */}
+              <span className="text-white text-3xl">☹️</span> 
             </div>
             <span className="text-sm font-medium">Poor</span>
           </button>

@@ -17,7 +17,17 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { MoreVertical, ArrowUpDown } from "lucide-react";
+import {
+  MoreVertical,
+  ArrowUpDown,
+  MessageCircle,
+  User,
+  Hash,
+  Target,
+  Trophy,
+  Percent,
+  ChartBar,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -32,6 +42,7 @@ interface Student {
   _id: string;
   name: string;
   rollNumber: string;
+  adNumber: string;
 }
 
 interface DvtMark {
@@ -49,6 +60,7 @@ interface SubjectHistory {
   evaluations: Array<{
     id: string;
     studentName: string;
+    rollNumber: string;
     adNumber: string;
     mark: number;
     date: string;
@@ -81,7 +93,10 @@ const EditDialog = ({ evaluation, onSave }: EditDialogProps) => {
       <div className="space-y-4 py-4">
         <div>
           <label className="block text-sm font-medium mb-1">Mark</label>
-          <Select value={mark.toString()} onValueChange={(value) => setMark(parseInt(value))}>
+          <Select
+            value={mark.toString()}
+            onValueChange={(value) => setMark(parseInt(value))}
+          >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -93,7 +108,9 @@ const EditDialog = ({ evaluation, onSave }: EditDialogProps) => {
           </Select>
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Punishment (optional)</label>
+          <label className="block text-sm font-medium mb-1">
+            Punishment (optional)
+          </label>
           <input
             type="text"
             value={punishment}
@@ -102,7 +119,9 @@ const EditDialog = ({ evaluation, onSave }: EditDialogProps) => {
           />
         </div>
         <DialogClose asChild>
-          <Button onClick={handleSave} className="w-full">Save Changes</Button>
+          <Button onClick={handleSave} className="w-full">
+            Save Changes
+          </Button>
         </DialogClose>
       </div>
     </DialogContent>
@@ -123,15 +142,18 @@ export default function History() {
     const fetchStudents = async () => {
       try {
         const response = await fetch(`${baseUrl}/api/students`, {
-          credentials: "include"
+          credentials: "include",
         });
         if (!response.ok) throw new Error("Failed to fetch students");
         const data = await response.json();
         // Convert array to object with _id as key
-        const studentsMap = data.reduce((acc: { [key: string]: Student }, student: Student) => {
-          acc[student._id] = student;
-          return acc;
-        }, {});
+        const studentsMap = data.reduce(
+          (acc: { [key: string]: Student }, student: Student) => {
+            acc[student._id] = student;
+            return acc;
+          },
+          {}
+        );
         setStudents(studentsMap);
       } catch (error) {
         console.error("Error fetching students:", error);
@@ -145,7 +167,7 @@ export default function History() {
     const fetchDvtMarks = async () => {
       try {
         const response = await fetch(`${baseUrl}/api/dvtMarks`, {
-          credentials: "include"
+          credentials: "include",
         });
         if (!response.ok) throw new Error("Failed to fetch DvtMarks");
         const data = await response.json();
@@ -160,37 +182,39 @@ export default function History() {
 
   const handleDelete = async (id: string) => {
     try {
-      const token = localStorage.getItem('token'); // Get token from localStorage
+      const token = localStorage.getItem("token"); // Get token from localStorage
       const response = await fetch(`${baseUrl}/api/dvtMarks/${id}`, {
         method: "DELETE",
         credentials: "include",
         headers: {
-          'Authorization': `Bearer ${token}` // Include token in headers
-        }
+          Authorization: `Bearer ${token}`, // Include token in headers
+        },
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Failed to delete evaluation');
+        throw new Error(error.message || "Failed to delete evaluation");
       }
 
       // Update local state
-      setDvtMarks(prevMarks => prevMarks.filter(mark => mark._id !== id));
+      setDvtMarks((prevMarks) => prevMarks.filter((mark) => mark._id !== id));
       toast.success("Evaluation deleted successfully");
     } catch (error) {
       console.error("Error deleting evaluation:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to delete evaluation");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete evaluation"
+      );
     }
   };
 
   const handleEdit = async (id: string, mark: number, punishment?: string) => {
     try {
-      const token = localStorage.getItem('token'); // Get token from localStorage
+      const token = localStorage.getItem("token"); // Get token from localStorage
       const response = await fetch(`${baseUrl}/api/dvtMarks/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          'Authorization': `Bearer ${token}` // Include token in headers
+          Authorization: `Bearer ${token}`, // Include token in headers
         },
         credentials: "include",
         body: JSON.stringify({ mark, punishment }),
@@ -198,59 +222,64 @@ export default function History() {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Failed to update evaluation');
+        throw new Error(error.message || "Failed to update evaluation");
       }
 
       const updatedMark = await response.json();
 
       // Update local state
-      setDvtMarks(prevMarks =>
-        prevMarks.map(m => m._id === id ? { ...m, mark, punishment } : m)
+      setDvtMarks((prevMarks) =>
+        prevMarks.map((m) => (m._id === id ? { ...m, mark, punishment } : m))
       );
-      
+
       toast.success("Evaluation updated successfully");
     } catch (error) {
       console.error("Error updating evaluation:", error);
-      toast.error(error instanceof Error ? error.message : "Failed to update evaluation");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to update evaluation"
+      );
     }
   };
 
   const toggleSortOrder = () => {
-    setSortOrder(prev => prev === "asc" ? "desc" : "asc");
+    setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
   };
 
   // When subject changes or sort order changes, filter and organize the history
   useEffect(() => {
-    if (!selectedSubject || !dvtMarks.length || !Object.keys(students).length) return;
+    if (!selectedSubject || !dvtMarks.length || !Object.keys(students).length)
+      return;
 
-    const [subject, classStr] = selectedSubject.split('|');
+    const [subject, classStr] = selectedSubject.split("|");
     const classNum = parseInt(classStr);
 
     const subjectHistory: SubjectHistory = {
       subject: subject,
-      evaluations: []
+      evaluations: [],
     };
-    
-    const filteredMarks = dvtMarks.filter(mark => 
-      mark.subject === subject && mark.class === classNum
-    );  
 
-    subjectHistory.evaluations = filteredMarks.map(mark => {
+    const filteredMarks = dvtMarks.filter(
+      (mark) => mark.subject === subject && mark.class === classNum
+    );
+
+    subjectHistory.evaluations = filteredMarks.map((mark) => {
       const student = students[mark.studentId._id];
-      console.log(mark.studentId._id); 
+      console.log(mark.studentId._id);
       return {
         id: mark._id,
         studentName: student ? student.name : "Unknown Student",
+        rollNumber: student ? student.rollNumber : "N/A",
         adNumber: student ? student.adNumber : "N/A",
         mark: mark.mark,
         date: mark.date,
-        punishment: mark.punishment
+        punishment: mark.punishment,
       };
     });
 
     // Sort by date
     subjectHistory.evaluations.sort((a, b) => {
-      const comparison = new Date(a.date).getTime() - new Date(b.date).getTime();
+      const comparison =
+        new Date(a.date).getTime() - new Date(b.date).getTime();
       return sortOrder === "asc" ? comparison : -comparison;
     });
 
@@ -259,19 +288,27 @@ export default function History() {
 
   const getMarkLabel = (mark: number) => {
     switch (mark) {
-      case 0: return "Poor";
-      case 1: return "Good";
-      case 2: return "Great";
-      default: return "Unknown";
+      case 0:
+        return "Poor";
+      case 1:
+        return "Good";
+      case 2:
+        return "Great";
+      default:
+        return "Unknown";
     }
   };
 
   const getMarkColor = (mark: number) => {
     switch (mark) {
-      case 0: return "text-red-600";
-      case 1: return "text-yellow-600";
-      case 2: return "text-green-600";
-      default: return "text-gray-600";
+      case 0:
+        return "text-red-600";
+      case 1:
+        return "text-yellow-600";
+      case 2:
+        return "text-green-600";
+      default:
+        return "text-gray-600";
     }
   };
 
@@ -280,31 +317,28 @@ export default function History() {
       <Header showContext={false} onHomeClick={() => {}} />
       <main className="flex-1 p-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Evaluation History</h1>
+          <h1 className="text-2xl font-bold text-blue-600">Evaluation History</h1>
           <Button
             variant="outline"
             size="sm"
             onClick={toggleSortOrder}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 bg-blue-50 text-blue-600 font-medium border-blue-600 hover:bg-blue-100 hover:text-blue-600 hover:border-blue-600 focus:bg-blue-100 focus:text-blue-600 focus:border-blue-600 focus:outline-none "
           >
             <ArrowUpDown className="h-4 w-4" />
             {sortOrder === "asc" ? "Oldest First" : "Newest First"}
           </Button>
         </div>
-        
+
         {/* Subject Selection */}
         <div className="mb-6">
-          <Select
-            value={selectedSubject}
-            onValueChange={setSelectedSubject}
-          >
-            <SelectTrigger className="w-full">
+          <Select value={selectedSubject} onValueChange={setSelectedSubject}>
+            <SelectTrigger className="w-full bg-blue-50 text-blue-600 font-medium border-blue-600 hover:bg-blue-100 hover:text-blue-600 hover:border-blue-600 focus:bg-blue-100 focus:text-blue-600 focus:border-blue-600 focus:outline-none ">
               <SelectValue placeholder="Select a subject" />
             </SelectTrigger>
             <SelectContent>
               {user?.subjectsTaught?.map((subjectTaught, index) => (
-                <SelectItem 
-                  key={`${subjectTaught.subject}-${subjectTaught.class}-${index}`} 
+                <SelectItem
+                  key={`${subjectTaught.subject}-${subjectTaught.class}-${index}`}
                   value={`${subjectTaught.subject}|${subjectTaught.class}`}
                 >
                   {subjectTaught.subject} (Class {subjectTaught.class})
@@ -318,59 +352,289 @@ export default function History() {
         {history && (
           <div className="space-y-4">
             {history.evaluations.map((evaluation) => (
-              <Card key={evaluation.id}>
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h3 className="font-medium">{evaluation.studentName}</h3>
-                        <p className="text-sm text-gray-500">Admission No: {evaluation.adNumber}</p>
-                      <p className="text-sm text-gray-500">
-                        {format(new Date(evaluation.date), "PPp")}
-                      </p>
-                    </div>
-                    <div className="text-right flex items-start gap-4">
+              // <Card key={evaluation.id}>
+              //   <CardContent className="p-4">
+              //     <div className="flex justify-between items-start">
+              //       <div className="flex-1">
+              //         <h3 className="font-medium">{evaluation.studentName}</h3>
+              //           <p className="text-sm text-gray-500">Admission No: {evaluation.adNumber}</p>
+              //         <p className="text-sm text-gray-500">
+              //           {format(new Date(evaluation.date), "PPp")}
+              //         </p>
+              //       </div>
+              //       <div className="text-right flex items-start gap-4">
+              //         <div>
+              //           <p className={`font-medium ${getMarkColor(evaluation.mark)}`}>
+              //             {getMarkLabel(evaluation.mark)}
+              //           </p>
+              //           {evaluation.punishment && (
+              //             <p className="text-sm text-red-500 mt-1">
+              //               Punishment: {evaluation.punishment}
+              //             </p>
+              //           )}
+              //         </div>
+              //         <DropdownMenu>
+              //           <DropdownMenuTrigger asChild>
+              //             <Button variant="ghost" className="h-8 w-8 p-0">
+              //               <MoreVertical className="h-4 w-4" />
+              //             </Button>
+              //           </DropdownMenuTrigger>
+              //           <DropdownMenuContent align="end">
+              //             <Dialog>
+              //               <DialogTrigger asChild>
+              //                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+              //                   Edit
+              //                 </DropdownMenuItem>
+              //               </DialogTrigger>
+              //               <EditDialog
+              //                 evaluation={evaluation}
+              //                 onSave={handleEdit}
+              //               />
+              //             </Dialog>
+              //             <DropdownMenuItem
+              //               className="text-red-600"
+              //               onClick={() => handleDelete(evaluation.id)}
+              //             >
+              //               Delete
+              //             </DropdownMenuItem>
+              //           </DropdownMenuContent>
+              //         </DropdownMenu>
+              //       </div>
+              //     </div>
+              //   </CardContent>
+              // </Card>
+              <Card
+                key={evaluation.id}
+                className={`w-full max-w-md mx-auto border-0 shadow-xl overflow-hidden ${
+                  getMarkLabel(evaluation.mark) === "Great"
+                    ? "bg-gradient-to-br from-blue-50 to-indigo-100"
+                    : getMarkLabel(evaluation.mark) === "Good"
+                    ? "bg-gradient-to-br from-amber-50 to-orange-100"
+                    : "bg-gradient-to-br from-red-50 to-orange-100"
+                }`}
+              >
+                {/* Header Section */}
+                <div
+                  className={`px-4 py-4 ${
+                    getMarkLabel(evaluation.mark) === "Great"
+                      ? "bg-gradient-to-r from-blue-600 to-indigo-600"
+                      : getMarkLabel(evaluation.mark) === "Good"
+                      ? "bg-gradient-to-r from-amber-600 to-orange-600"
+                      : "bg-gradient-to-r from-red-600 to-orange-600"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
                       <div>
-                        <p className={`font-medium ${getMarkColor(evaluation.mark)}`}>
+                        <h2 className="text-xl font-bold text-white leading-tight">
+                          {evaluation.studentName}
+                        </h2>
+                      </div>
+                    </div>
+                    {/* {getMarkLabel(evaluation.mark) === "Poor" && ( */}
+                    {/* <div
+                      className="bg-white/20 px-3 py-1 rounded-full flex items-center gap-2 cursor-pointer hover:bg-white/30 transition-colors"
+                      // onClick={() => handleAskMeClick(evaluation.studentName)}
+                    > */}
+                    {/* <MessageCircle className="w-4 h-4 text-white" />
+                      <span className="text-white text-sm font-medium">
+                        Ask Me
+                      </span> */}
+
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          className="h-8 w-8 p-0 bg-white/20 px-3 py-1 rounded flex items-center gap-2 cursor-pointer hover:bg-white/30 transition-colors"
+                        >
+                          <MoreVertical className="h-4 w-4 text-white" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <DropdownMenuItem
+                              onSelect={(e) => e.preventDefault()}
+                            >
+                              Edit
+                            </DropdownMenuItem>
+                          </DialogTrigger>
+                          <EditDialog
+                            evaluation={evaluation}
+                            onSave={handleEdit}
+                          />
+                        </Dialog>
+                        <DropdownMenuItem
+                          className="text-red-600"
+                          onClick={() => handleDelete(evaluation.id)}
+                        >
+                          Delete
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    {/* </div> */}
+                    {/* )} */}
+                  </div>
+                </div>
+
+                {/* Content Section */}
+                <div className="p-6 space-y-4">
+                  {/* Student Details */}
+                  {/* <div className="bg-white/80 rounded-xl p-4 shadow-sm">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={`bg-blue-500/80 p-2 rounded-lg ${
+                            getMarkLabel(evaluation.mark) === "Great"
+                              ? "bg-blue-500/80"
+                              : getMarkLabel(evaluation.mark) === "Good"
+                              ? "bg-amber-500/80"
+                              : "bg-red-500/80"
+                          }`}
+                        >
+                          <User className="w-4 h-4 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 uppercase tracking-wide">
+                            Roll No
+                          </p>
+                          <p className="font-semibold text-gray-800">
+                            {evaluation.rollNumber}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={`bg-blue-500/80 p-2 rounded-lg ${
+                            getMarkLabel(evaluation.mark) === "Great"
+                              ? "bg-blue-500/80"
+                              : getMarkLabel(evaluation.mark) === "Good"
+                              ? "bg-amber-500/80"
+                              : "bg-red-500/80"
+                          }`}
+                        >
+                          <Hash className="w-4 h-4 text-white" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-gray-500 uppercase tracking-wide">
+                            Admission No
+                          </p>
+                          <p className="font-semibold text-gray-800">
+                            {evaluation.adNumber}
+                          </p>
+                        </div> 
+                        
+                      </div>
+                    </div>
+                  </div> */}
+
+                  {/* Performance Metrics */}
+                  <div className="bg-white/80 rounded-xl p-4 shadow-sm">
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="text-center">
+                        <div className="flex items-center justify-center gap-2 mb-1">
+                          <Hash
+                            className={`w-4 h-4 ${
+                              getMarkLabel(evaluation.mark) === "Great"
+                                ? "text-blue-600"
+                                : getMarkLabel(evaluation.mark) === "Good"
+                                ? "text-amber-600"
+                                : "text-red-600"
+                            }`}
+                          />
+                          <p className="text-xs text-gray-500 uppercase tracking-wide">
+                            Sl. No.
+                          </p>
+                        </div>
+                        <p className="text-lg font-bold text-gray-800">
+                          {evaluation.rollNumber}
+                        </p>
+                      </div>
+
+                      <div className="text-center">
+                        <div className="flex items-center justify-center gap-2 mb-1">
+                          <User
+                            className={`w-4 h-4 ${
+                              getMarkLabel(evaluation.mark) === "Great"
+                                ? "text-blue-600"
+                                : getMarkLabel(evaluation.mark) === "Good"
+                                ? "text-amber-600"
+                                : "text-red-600"
+                            }`}
+                          />
+                          <p className="text-xs text-gray-500 uppercase tracking-wide">
+                            Ad. No.
+                          </p>
+                        </div>
+                        <p className="text-lg font-bold text-gray-800">
+                          {evaluation.adNumber}
+                        </p>
+                      </div>
+
+                      <div className="text-center">
+                        <div className="flex items-center justify-center gap-2 mb-1">
+                          <ChartBar
+                            className={`w-4 h-4 ${
+                              getMarkLabel(evaluation.mark) === "Great"
+                                ? "text-blue-600"
+                                : getMarkLabel(evaluation.mark) === "Good"
+                                ? "text-amber-600"
+                                : "text-red-600"
+                            }`}
+                          />
+                          <p className="text-xs text-gray-500 uppercase tracking-wide">
+                            Status
+                          </p>
+                        </div>
+                        <p
+                          className={`text-lg font-bold ${
+                            getMarkLabel(evaluation.mark) === "Great"
+                              ? "text-blue-600"
+                              : getMarkLabel(evaluation.mark) === "Good"
+                              ? "text-amber-600"
+                              : "text-red-600"
+                          }`}
+                        >
+                          {getMarkLabel(evaluation.mark) === "Great"
+                            ? "🙂"
+                            : getMarkLabel(evaluation.mark) === "Good"
+                            ? "😐"
+                            : "☹️"}{" "}
                           {getMarkLabel(evaluation.mark)}
                         </p>
-                        {evaluation.punishment && (
-                          <p className="text-sm text-red-500 mt-1">
-                            Punishment: {evaluation.punishment}
-                          </p>
-                        )}
                       </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                                Edit
-                              </DropdownMenuItem>
-                            </DialogTrigger>
-                            <EditDialog
-                              evaluation={evaluation}
-                              onSave={handleEdit}
-                            />
-                          </Dialog>
-                          <DropdownMenuItem
-                            className="text-red-600"
-                            onClick={() => handleDelete(evaluation.id)}
-                          >
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
                     </div>
                   </div>
-                </CardContent>
+
+                  {/* Percentage Badge */}
+                  {/* <div className="text-center">
+                    <div
+                      className={`inline-flex items-center gap-2 text-white px-6 py-3 rounded-full shadow-lg ${
+                        getMarkLabel(evaluation.mark) === "Great"
+                          ? "bg-gradient-to-r from-blue-500 to-indigo-500"
+                          : getMarkLabel(evaluation.mark) === "Good"
+                          ? "bg-gradient-to-r from-amber-500 to-orange-500"
+                          : "bg-gradient-to-r from-red-500 to-red-600"
+                      }`}
+                    > */}
+                  {/* <Trophy className="w-5 h-5" /> */}
+                  {/* <span className="text-white text-3xl">
+                        {getMarkLabel(evaluation.mark) === "Great"
+                          ? "🙂"
+                          : getMarkLabel(evaluation.mark) === "Good"
+                          ? "😐"
+                          : "☹️"}
+                      </span>
+                      <span className="font-bold text-lg">
+                        {getMarkLabel(evaluation.mark)}
+                      </span>
+                    </div> */}
+                  {/* </div> */}
+                </div>
               </Card>
             ))}
-            
+
             {history.evaluations.length === 0 && (
               <p className="text-center text-gray-500 py-8">
                 No evaluations found for this subject

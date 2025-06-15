@@ -41,7 +41,7 @@ export default function Header({
   }
 
   return (
-    <header className="bg-primary text-white p-4 shadow-md relative z-10">
+    <header className="bg-gradient-to-r from-blue-500 to-blue-700 text-white p-4 shadow-md relative z-10">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
           <Navigation />
@@ -71,8 +71,8 @@ export default function Header({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="focus:outline-none">
-                  <Avatar className="h-8 w-8 border-2 border-white">
-                    <AvatarFallback className="bg-primary-foreground text-primary text-sm">
+                  <Avatar className="h-8 w-8 border-2 border-blue-100">  
+                    <AvatarFallback className="bg-transparent text-blue-100 text-sm"> 
                       {user.name.substring(0, 2).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
