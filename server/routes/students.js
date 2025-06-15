@@ -83,57 +83,5 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// Update dvtMarks of a student
-router.post("/dvtMarks/:id", async (req, res) => {
-  try {
-    console.log("Submitting evaluation for student:", req.params.id);
-    console.log("Evaluation data:", req.body);
-
-    // Find the student
-    const student = await Student.findById(req.params.id);
-    if (!student) {
-      console.error("Student not found:", req.params.id);
-      return res.status(404).json({ message: "Student not found" });
-    }
-    console.log("Found student:", student.name);
-
-    // Create the mark object
-    const dvtMark = {
-      subject: req.body.subject,
-      mark: req.body.mark,
-      date: new Date(),
-      punishment: req.body.punishment,
-    };
-
-    // Add to student's dvtMarks array
-    student.dvtMarks.push(dvtMark);
-    await student.save();
-    console.log("Updated student's dvtMarks array");
-
-    // Create a new DvtMarks document
-    const newDvtMark = new DvtMarks({
-      studentId: student._id,
-      class: student.class,
-      subject: req.body.subject,
-      mark: req.body.mark,
-      date: new Date(),
-      punishment: req.body.punishment
-    });
-
-    // Save the new DvtMarks document
-    const savedDvtMark = await newDvtMark.save();
-    console.log("Created new DvtMarks document:", savedDvtMark._id);
-
-    // Return the updated student with the new DvtMarks document
-    const result = {
-      student: student,
-      dvtMark: savedDvtMark
-    };
-    res.json(result);
-  } catch (err) {
-    console.error("Error saving dvtMarks:", err);
-    res.status(400).json({ message: err.message });
-  }
-});
 
 module.exports = router;

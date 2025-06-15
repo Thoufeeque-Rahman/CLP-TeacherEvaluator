@@ -1,20 +1,27 @@
 export interface Student {
-  _id: number;
+  _id: string;
   name: string;
   rollNumber: string;
   adNumber: string;
-  photoUrl: string | null;
-  classId: number;
-  dvtMarks?: string[];
+  photoUrl?: string;
+  classId?: number;
+  class?: number;
+  dvtMarks?: Array<{
+    subject: string;
+    mark: number;
+    date: string;
+    punishment?: string;
+  }>;
 }
 
 export interface DvtMark {
   _id: string;
-  studentId: number;
+  studentId: string;
   subject: string;
   mark: number;
   punishment?: string;
   date: string;
+  class: number;
 }
 
 export interface SubjectInfo {

@@ -60,7 +60,7 @@ export default function StartScreen({
                 onSubjectSelect({ subject: subject.subject, class: subject.class });
               }}
             >
-              {subject.subject} - Class {subject.class}
+              {subject.subject} - {subject.class}
             </button>
           ))}
         </div>

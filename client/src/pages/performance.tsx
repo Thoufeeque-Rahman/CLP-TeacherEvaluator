@@ -5,7 +5,7 @@ import {
   Select,
   SelectContent,
   SelectItem,
-  SelectLabel, 
+  SelectLabel,
   SelectTrigger,
   SelectValue,
   SelectGroup,
@@ -23,30 +23,12 @@ import {
   Percent,
   ArrowUpDown,
   ChartBar,
+  RefreshCw,
 } from "lucide-react";
 import { getPerformanceColors } from "@/lib/colors";
-
-interface Student {
-  _id: string;
-  name: string;
-  rollNumber: string;
-  adNumber: string;
-}
-
-interface DvtMark {
-  _id: string;
-  studentId: {
-    _id: string;
-    name: string;
-    rollNumber: string;
-    adNumber: string;
-  };
-  class: number;
-  subject: string;
-  mark: number;
-  date: string;
-  punishment?: string;
-}
+import { AskMeModal } from "@/components/AskMeModal";
+import { useToast } from "@/hooks/use-toast";
+import { Student, DvtMark } from "@/types";
 
 interface StudentPerformance {
   student: Student;
@@ -59,106 +41,102 @@ type SortField = "rollNumber" | "adNumber" | "percentage" | "name";
 type SortDirection = "asc" | "desc";
 
 export default function Performance() {
+  const { toast } = useToast();
   const { user } = useAuth();
   const [, setLocation] = useLocation();
   const [selectedSubject, setSelectedSubject] = useState<string>("");
-  const [students, setStudents] = useState<{ [key: string]: Student }>({});
+  const [students, setStudents] = useState<Student[]>([]);
   const [dvtMarks, setDvtMarks] = useState<DvtMark[]>([]);
   const [studentPerformance, setStudentPerformance] = useState<
     StudentPerformance[]
   >([]);
   const [sortField, setSortField] = useState<SortField>("rollNumber");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [isAskMeModalOpen, setIsAskMeModalOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const baseUrl = import.meta.env.VITE_BASE_URL;
 
-  // Fetch all students when component mounts
-  useEffect(() => {
-    const fetchStudents = async () => {
-      try {
-        const response = await fetch(`${baseUrl}/api/students`, {
-          credentials: "include",
-        });
-        if (!response.ok) throw new Error("Failed to fetch students");
-        const data = await response.json();
-        console.log(data);
-        const studentsMap = data.reduce(
-          (acc: { [key: string]: Student }, student: Student) => {
-            acc[student._id] = student;
-            return acc;
-          },
-          {}
-        );
-        console.log(studentsMap);
-        setStudents(studentsMap);
-      } catch (error) {
-        console.error("Error fetching students:", error);
-      }
-    };
-    fetchStudents();
-  }, []);
+  const fetchStudents = async () => {
+    try {
+      const response = await fetch(`${baseUrl}/api/students`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      if (!response.ok) throw new Error("Failed to fetch students");
+      const data = await response.json();
+      console.log(data);
+      setStudents(data);
+    } catch (error) {
+      console.error("Error fetching students:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch students. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
-  // Fetch all DvtMarks when component mounts
+  const fetchDvtMarks = async () => {
+    try {
+      const response = await fetch(`${baseUrl}/api/dvtmarks`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      if (!response.ok) throw new Error("Failed to fetch DVT marks");
+      const data = await response.json();
+      setDvtMarks(data);
+    } catch (error) {
+      console.error("Error fetching DVT marks:", error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch DVT marks. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   useEffect(() => {
-    const fetchDvtMarks = async () => {
-      try {
-        const response = await fetch(`${baseUrl}/api/dvtMarks`, {
-          credentials: "include",
-        });
-        if (!response.ok) throw new Error("Failed to fetch DvtMarks");
-        const data = await response.json();
-        setDvtMarks(data);
-      } catch (error) {
-        console.error("Error fetching DvtMarks:", error);
-      }
-    };
+    console.log(selectedSubject);
+    fetchStudents();
     fetchDvtMarks();
   }, []);
 
   // Calculate performance metrics when subject changes
   useEffect(() => {
-    if (!selectedSubject || !dvtMarks.length || !Object.keys(students).length)
-      return;
+    if (!selectedSubject || !dvtMarks.length || !students.length) return;
+    console.log(dvtMarks);
+    console.log(selectedSubject);
 
     const [subject, classStr] = selectedSubject.split("|");
     const classNum = parseInt(classStr);
 
-    const filteredMarks = dvtMarks.filter(
-      (mark) => mark.subject === subject && mark.class === classNum
-    );
-
-    // Group marks by student
-    const studentMarks = filteredMarks.reduce(
-      (acc: { [key: string]: DvtMark[] }, mark) => {
+    const performance = dvtMarks
+      .filter((mark) => mark.subject === subject && mark.class === classNum)
+      .reduce((acc: { [key: string]: StudentPerformance }, mark) => {
         const studentId = mark.studentId;
-        console.log(studentId);
-        console.log(acc);
+        console.log(mark);
         if (!acc[studentId]) {
-          acc[studentId] = [];
+          acc[studentId] = {
+            student:
+              students.find((s) => s._id === studentId) || ({} as Student),
+            totalQuestions: 0,
+            totalScore: 0,
+            percentage: 0,
+          };
         }
-        acc[studentId].push(mark);
+        acc[studentId].totalQuestions++;
+        acc[studentId].totalScore += mark.mark;
+        acc[studentId].percentage =
+          (acc[studentId].totalScore / (acc[studentId].totalQuestions * 2)) *
+          100;
         return acc;
-      },
-      {}
-    );
-
-    // Calculate performance metrics for each student
-    const performance = Object.entries(studentMarks).map(
-      ([studentId, marks]) => {
-        const totalQuestions = marks.length;
-        const totalScore = marks.reduce((sum, mark) => sum + mark.mark, 0);
-        const percentage = (totalScore / (totalQuestions * 2)) * 100; // Each question has max 2 marks
-        console.log(students);
-        return {
-          student: students[studentId],
-          totalQuestions,
-          totalScore,
-          percentage,
-        };
-      }
-    );
+      }, {});
 
     // Sort based on current sort field and direction
-    performance.sort((a, b) => {
+    const performanceArray = Object.values(performance);
+    performanceArray.sort((a, b) => {
       let comparison = 0;
       switch (sortField) {
         case "rollNumber":
@@ -179,7 +157,7 @@ export default function Performance() {
       return sortDirection === "asc" ? comparison : -comparison;
     });
 
-    setStudentPerformance(performance);
+    setStudentPerformance(performanceArray as StudentPerformance[]);
   }, [selectedSubject, dvtMarks, students, sortField, sortDirection]);
 
   const toggleSortDirection = () => {
@@ -187,21 +165,80 @@ export default function Performance() {
   };
 
   const handleAskMeClick = (student: Student) => {
-    setLocation(
-      `/evaluation?student=${student._id}&subject=${selectedSubject}`
-    );
+    setSelectedStudent(student);
+    setIsAskMeModalOpen(true);
+  };
+
+  const handleEvaluate = async (mark: number) => {
+    if (!selectedStudent || !user) return;
+
+    const subject = selectedSubject.split("|")[0];
+    const classNum = parseInt(selectedSubject.split("|")[1]);
+
+    try {
+      const response = await fetch(`${baseUrl}/api/dvtMarks`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          studentId: selectedStudent._id,
+          subject: subject,
+          mark,
+          class: classNum,
+        }),
+      });
+      console.log(response);
+      if (!response.ok) {
+        throw new Error("Failed to save evaluation");
+      }
+
+      toast({
+        title: "Evaluation Saved",
+        description: `Successfully evaluated ${selectedStudent.name} ${response.status}`,
+      });
+
+      // Refresh the data
+      fetchStudents();
+    } catch (error) {
+      console.error("Error saving evaluation:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save evaluation. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleRefresh = async () => {
+    try {
+      await Promise.all([fetchStudents(), fetchDvtMarks()]);
+      toast({
+        title: "Data Refreshed",
+        description: "Successfully refreshed student data and evaluations.",
+      });
+    } catch (error) {
+      console.error("Error refreshing data:", error);
+      toast({
+        title: "Error",
+        description: "Failed to refresh data. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
     <div className="mx-auto max-w-md bg-white min-h-screen shadow-lg relative h-full flex flex-col">
       <Header showContext={false} onHomeClick={() => {}} />
       <main className="flex-1 p-6">
-        <h1 className="text-2xl font-bold mb-6 text-blue-600">
-          Performance Board
-        </h1>
+        <div className="flex justify-start items-center mb-4">
+          <h1 className="text-2xl font-bold text-blue-600">
+            Performance Board
+          </h1>
+        </div>
 
-        {/* Subject Selection */}
-        <div className="mb-4">
+        <div className="flex justify-between items-center mb-4">
           <Select value={selectedSubject} onValueChange={setSelectedSubject}>
             <SelectTrigger className="w-full bg-blue-50 text-blue-600 font-medium border-blue-600 hover:bg-blue-100 hover:text-blue-600 hover:border-blue-600 focus:bg-blue-100 focus:text-blue-600 focus:border-blue-600 focus:outline-none">
               <SelectValue placeholder="Select a subject" />
@@ -251,6 +288,16 @@ export default function Performance() {
               <ArrowUpDown className="w-4 h-4 mr-2" />
               {sortDirection === "asc" ? "Ascending" : "Descending"}
             </Button>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRefresh}
+              className="flex items-center gap-2 bg-blue-50 text-blue-600 font-medium border-blue-600 hover:bg-blue-100 hover:text-blue-600 hover:border-blue-600 focus:bg-blue-100 focus:text-blue-600 focus:border-blue-600 focus:outline-none"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Refresh
+            </Button>
           </div>
         )}
 
@@ -281,7 +328,7 @@ export default function Performance() {
                         </h2>
                       </div>
                     </div>
-                    {performance.percentage < 50 && (
+                    {performance.percentage < 80 && (
                       <div
                         className="bg-white/20 px-3 py-1 rounded-full flex items-center text-center gap-2 cursor-pointer hover:bg-white/30 transition-colors justify-end"
                         onClick={() => handleAskMeClick(performance.student)}
@@ -354,6 +401,17 @@ export default function Performance() {
           )}
         </div>
       </main>
+
+      {selectedStudent && (
+        <AskMeModal
+          isOpen={isAskMeModalOpen}
+          onClose={() => setIsAskMeModalOpen(false)}
+          student={selectedStudent}
+          onEvaluate={handleEvaluate}
+          subject={selectedSubject.split("|")[0]}
+          class={parseInt(selectedSubject.split("|")[1])}
+        />
+      )}
     </div>
   );
 }
