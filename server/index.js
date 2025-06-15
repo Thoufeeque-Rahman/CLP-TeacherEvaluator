@@ -15,7 +15,8 @@ app.use(
     origin: [
       process.env.VITE_FRONT_URL,
       'http://localhost:5173', // Vite dev server default port
-      'http://127.0.0.1:5173'
+      'http://127.0.0.1:5173',
+      'https://daily-viva-tracker.onrender.com' // Add Render deployment URL
     ],
     credentials: true,
   })
