@@ -12,26 +12,26 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/contexts/AuthContext";
 import { GraduationCap } from "lucide-react";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const { toast } = useToast();
-  const { user, isLoading, login, register } = useAuth();
+  const { user, isAuthenticated, login } = useAuth();
   const [, setLocation] = useLocation();
 
   // Redirect if already logged in
-  if (user) {
+  if (isAuthenticated) {
     return <Redirect to="/" />;
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email || !password) {
+    if (!username || !password) {
       toast({
         title: "Missing fields",
         description: "Please fill in all required fields",
@@ -41,34 +41,19 @@ export default function AuthPage() {
     }
 
     try {
-      if (isLogin) {
-        await login({ email, password });
-        toast({
-          title: "Login successful",
-          description: "Welcome back!",
-        });
-        setLocation("/");
-      } else {
-        await register({ email, password });
-        toast({
-          title: "Registration successful",
-          description: "You can now log in with your credentials",
-        });
-        setIsLogin(true);
-      }
+      await login(username, password);
+      toast({
+        title: "Login successful",
+        description: "Welcome back!",
+      });
+      setLocation("/");
     } catch (error: any) {
       toast({
-        title: isLogin ? "Login failed" : "Registration failed",
-        description: error.response?.data?.error || error.message,
+        title: "Login failed",
+        description: error.message || "Invalid credentials",
         variant: "destructive",
       });
     }
-  };
-
-  const toggleMode = () => {
-    setIsLogin(!isLogin);
-    setEmail("");
-    setPassword("");
   };
 
   return (
@@ -90,22 +75,20 @@ export default function AuthPage() {
         {/* Auth Card */}
         <Card>
           <CardHeader>
-            <CardTitle>{isLogin ? "Login" : "Register"}</CardTitle>
+            <CardTitle>Login</CardTitle>
             <CardDescription>
-              {isLogin
-                ? "Enter your credentials to access your account"
-                : "Create a new account to get started"}
+              Enter your credentials to access your account
             </CardDescription>
           </CardHeader>
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="username">Username</Label>
                 <Input
-                  id="email"
-                  placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="username"
+                  placeholder="Enter your username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   required
                 />
               </div>
@@ -121,28 +104,10 @@ export default function AuthPage() {
                 />
               </div>
             </CardContent>
-            <CardFooter className="flex flex-col space-y-3">
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLogin
-                  ? isLoading
-                    ? "Logging in..."
-                    : "Login"
-                  : isLoading
-                  ? "Registering..."
-                  : "Register"}
+            <CardFooter>
+              <Button type="submit" className="w-full">
+                Login
               </Button>
-              <p className="text-sm text-center text-gray-500">
-                {isLogin
-                  ? "Don't have an account?"
-                  : "Already have an account?"}
-                <button
-                  type="button"
-                  onClick={toggleMode}
-                  className="text-primary font-medium ml-1 hover:underline"
-                >
-                  {isLogin ? "Register" : "Login"}
-                </button>
-              </p>
             </CardFooter>
           </form>
         </Card>

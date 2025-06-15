@@ -10,10 +10,7 @@ const dvtMarksSchema = new mongoose.Schema({
     type: Number,
     required: true
   },
-  subject: {
-    type: String,
-    required: true
-  },
+  subject: String,
   mark: {
     type: Number,
     required: true,
@@ -33,4 +30,4 @@ const dvtMarksSchema = new mongoose.Schema({
   timestamps: true
 });
 
-module.exports = mongoose.model("dvtMarks", dvtMarksSchema);
+module.exports = mongoose.model("DvtMark", dvtMarksSchema);

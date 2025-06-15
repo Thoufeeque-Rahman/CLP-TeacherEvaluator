@@ -1,5 +1,5 @@
 import { Home, LogOut, User } from "lucide-react";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,18 +26,18 @@ export default function Header({
   showContext,
   onHomeClick,
 }: HeaderProps) {
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
-  useEffect(() => {
-    console.log(user); 
-  }, [user]);
-
-  if (!user) {
-    <Redirect to="/auth" />; 
+  if (!isAuthenticated) {
+    return <Redirect to="/auth" />;
   }
 
   return (

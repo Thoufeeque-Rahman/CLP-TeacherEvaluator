@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
 import {
   DropdownMenu,
@@ -36,7 +36,19 @@ import {
   DialogTrigger,
   DialogClose,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
+import { getMarkColors } from "@/lib/colors";
 
 interface Student {
   _id: string;
@@ -48,8 +60,18 @@ interface Student {
 interface DvtMark {
   _id: string;
   studentId: string;
-  class: number;
   subject: string;
+  class: number;
+  mark: number;
+  date: string;
+  punishment?: string;
+}
+
+interface Evaluation {
+  id: string;
+  studentName: string;
+  rollNumber: string;
+  adNumber: string;
   mark: number;
   date: string;
   punishment?: string;
@@ -57,24 +79,21 @@ interface DvtMark {
 
 interface SubjectHistory {
   subject: string;
-  evaluations: Array<{
-    id: string;
-    studentName: string;
-    rollNumber: string;
-    adNumber: string;
-    mark: number;
-    date: string;
-    punishment?: string;
-  }>;
+  evaluations: Evaluation[];
 }
 
 interface EditDialogProps {
+  evaluation: Evaluation;
+  onSave: (id: string, mark: number, punishment?: string) => Promise<void>;
+}
+
+interface DeleteDialogProps {
   evaluation: {
     id: string;
-    mark: number;
-    punishment?: string;
+    studentName: string;
+    date: string;
   };
-  onSave: (id: string, mark: number, punishment?: string) => Promise<void>;
+  onConfirm: (id: string) => Promise<void>;
 }
 
 const EditDialog = ({ evaluation, onSave }: EditDialogProps) => {
@@ -97,7 +116,7 @@ const EditDialog = ({ evaluation, onSave }: EditDialogProps) => {
             value={mark.toString()}
             onValueChange={(value) => setMark(parseInt(value))}
           >
-            <SelectTrigger>
+            <SelectTrigger className="bg-blue-50 text-blue-600 font-medium border-blue-600 hover:bg-blue-100 hover:text-blue-600 hover:border-blue-600 focus:bg-blue-100 focus:text-blue-600 focus:border-blue-600 focus:outline-none">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -107,7 +126,7 @@ const EditDialog = ({ evaluation, onSave }: EditDialogProps) => {
             </SelectContent>
           </Select>
         </div>
-        <div>
+        {/* <div>
           <label className="block text-sm font-medium mb-1">
             Punishment (optional)
           </label>
@@ -117,7 +136,7 @@ const EditDialog = ({ evaluation, onSave }: EditDialogProps) => {
             onChange={(e) => setPunishment(e.target.value)}
             className="w-full p-2 border rounded-md"
           />
-        </div>
+        </div> */}
         <DialogClose asChild>
           <Button onClick={handleSave} className="w-full">
             Save Changes
@@ -125,6 +144,53 @@ const EditDialog = ({ evaluation, onSave }: EditDialogProps) => {
         </DialogClose>
       </div>
     </DialogContent>
+  );
+};
+
+const DeleteDialog = ({ evaluation, onConfirm }: DeleteDialogProps) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleConfirm = async () => {
+    await onConfirm(evaluation.id);
+    setIsOpen(false);
+  };
+
+  return (
+    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+      <AlertDialogTrigger asChild>
+        <DropdownMenuItem
+          className="text-red-600"
+          onSelect={(e) => {
+            e.preventDefault();
+            setIsOpen(true);
+          }}
+        >
+          Delete
+        </DropdownMenuItem>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>
+            Are you sure you want to delete this evaluation?
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            This will permanently delete the evaluation for{" "}
+            {evaluation.studentName} from{" "}
+            {format(new Date(evaluation.date), "PPp")}. This action cannot be
+            undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleConfirm}
+            className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+          >
+            Delete
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 };
 
@@ -146,10 +212,12 @@ export default function History() {
         });
         if (!response.ok) throw new Error("Failed to fetch students");
         const data = await response.json();
+        console.log(data);
         // Convert array to object with _id as key
         const studentsMap = data.reduce(
           (acc: { [key: string]: Student }, student: Student) => {
             acc[student._id] = student;
+            console.log(student._id);
             return acc;
           },
           {}
@@ -257,24 +325,34 @@ export default function History() {
       subject: subject,
       evaluations: [],
     };
+    console.log(students);
+    console.log(subject);
 
     const filteredMarks = dvtMarks.filter(
       (mark) => mark.subject === subject && mark.class === classNum
     );
+    console.log(filteredMarks);
 
-    subjectHistory.evaluations = filteredMarks.map((mark) => {
-      const student = students[mark.studentId._id];
-      console.log(mark.studentId._id);
-      return {
-        id: mark._id,
-        studentName: student ? student.name : "Unknown Student",
-        rollNumber: student ? student.rollNumber : "N/A",
-        adNumber: student ? student.adNumber : "N/A",
-        mark: mark.mark,
-        date: mark.date,
-        punishment: mark.punishment,
-      };
-    });
+    subjectHistory.evaluations = filteredMarks
+      .map((mark) => {
+        const student = students[mark.studentId];
+        console.log(mark);
+        if (!student) {
+          console.warn(`Student not found for ID: ${mark.studentId}`);
+          return null;
+        }
+        const evaluation: Evaluation = {
+          id: mark._id,
+          studentName: student.name,
+          rollNumber: student.rollNumber,
+          adNumber: student.adNumber,
+          mark: mark.mark,
+          date: mark.date,
+          punishment: mark.punishment,
+        };
+        return evaluation;
+      })
+      .filter((evaluation): evaluation is Evaluation => evaluation !== null);
 
     // Sort by date
     subjectHistory.evaluations.sort((a, b) => {
@@ -299,30 +377,19 @@ export default function History() {
     }
   };
 
-  const getMarkColor = (mark: number) => {
-    switch (mark) {
-      case 0:
-        return "text-red-600";
-      case 1:
-        return "text-yellow-600";
-      case 2:
-        return "text-green-600";
-      default:
-        return "text-gray-600";
-    }
-  };
-
   return (
     <div className="mx-auto max-w-md bg-white min-h-screen shadow-lg relative h-full flex flex-col">
       <Header showContext={false} onHomeClick={() => {}} />
       <main className="flex-1 p-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-blue-600">Evaluation History</h1>
+          <h1 className="text-2xl font-bold text-blue-600">
+            Evaluation History
+          </h1>
           <Button
             variant="outline"
             size="sm"
             onClick={toggleSortOrder}
-            className="flex items-center gap-2 bg-blue-50 text-blue-600 font-medium border-blue-600 hover:bg-blue-100 hover:text-blue-600 hover:border-blue-600 focus:bg-blue-100 focus:text-blue-600 focus:border-blue-600 focus:outline-none "
+            className="flex items-center gap-2 bg-blue-50 text-blue-600 font-medium border-blue-600 hover:bg-blue-100 hover:text-blue-600 hover:border-blue-600 focus:bg-blue-100 focus:text-blue-600 focus:border-blue-600 focus:outline-none"
           >
             <ArrowUpDown className="h-4 w-4" />
             {sortOrder === "asc" ? "Oldest First" : "Newest First"}
@@ -332,7 +399,7 @@ export default function History() {
         {/* Subject Selection */}
         <div className="mb-6">
           <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-            <SelectTrigger className="w-full bg-blue-50 text-blue-600 font-medium border-blue-600 hover:bg-blue-100 hover:text-blue-600 hover:border-blue-600 focus:bg-blue-100 focus:text-blue-600 focus:border-blue-600 focus:outline-none ">
+            <SelectTrigger className="w-full bg-blue-50 text-blue-600 font-medium border-blue-600 hover:bg-blue-100 hover:text-blue-600 hover:border-blue-600 focus:bg-blue-100 focus:text-blue-600 focus:border-blue-600 focus:outline-none">
               <SelectValue placeholder="Select a subject" />
             </SelectTrigger>
             <SelectContent>
@@ -351,289 +418,128 @@ export default function History() {
         {/* History Display */}
         {history && (
           <div className="space-y-4">
-            {history.evaluations.map((evaluation) => (
-              // <Card key={evaluation.id}>
-              //   <CardContent className="p-4">
-              //     <div className="flex justify-between items-start">
-              //       <div className="flex-1">
-              //         <h3 className="font-medium">{evaluation.studentName}</h3>
-              //           <p className="text-sm text-gray-500">Admission No: {evaluation.adNumber}</p>
-              //         <p className="text-sm text-gray-500">
-              //           {format(new Date(evaluation.date), "PPp")}
-              //         </p>
-              //       </div>
-              //       <div className="text-right flex items-start gap-4">
-              //         <div>
-              //           <p className={`font-medium ${getMarkColor(evaluation.mark)}`}>
-              //             {getMarkLabel(evaluation.mark)}
-              //           </p>
-              //           {evaluation.punishment && (
-              //             <p className="text-sm text-red-500 mt-1">
-              //               Punishment: {evaluation.punishment}
-              //             </p>
-              //           )}
-              //         </div>
-              //         <DropdownMenu>
-              //           <DropdownMenuTrigger asChild>
-              //             <Button variant="ghost" className="h-8 w-8 p-0">
-              //               <MoreVertical className="h-4 w-4" />
-              //             </Button>
-              //           </DropdownMenuTrigger>
-              //           <DropdownMenuContent align="end">
-              //             <Dialog>
-              //               <DialogTrigger asChild>
-              //                 <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-              //                   Edit
-              //                 </DropdownMenuItem>
-              //               </DialogTrigger>
-              //               <EditDialog
-              //                 evaluation={evaluation}
-              //                 onSave={handleEdit}
-              //               />
-              //             </Dialog>
-              //             <DropdownMenuItem
-              //               className="text-red-600"
-              //               onClick={() => handleDelete(evaluation.id)}
-              //             >
-              //               Delete
-              //             </DropdownMenuItem>
-              //           </DropdownMenuContent>
-              //         </DropdownMenu>
-              //       </div>
-              //     </div>
-              //   </CardContent>
-              // </Card>
-              <Card
-                key={evaluation.id}
-                className={`w-full max-w-md mx-auto border-0 shadow-xl overflow-hidden ${
-                  getMarkLabel(evaluation.mark) === "Great"
-                    ? "bg-gradient-to-br from-blue-50 to-indigo-100"
-                    : getMarkLabel(evaluation.mark) === "Good"
-                    ? "bg-gradient-to-br from-amber-50 to-orange-100"
-                    : "bg-gradient-to-br from-red-50 to-orange-100"
-                }`}
-              >
-                {/* Header Section */}
-                <div
-                  className={`px-4 py-4 ${
-                    getMarkLabel(evaluation.mark) === "Great"
-                      ? "bg-gradient-to-r from-blue-600 to-indigo-600"
-                      : getMarkLabel(evaluation.mark) === "Good"
-                      ? "bg-gradient-to-r from-amber-600 to-orange-600"
-                      : "bg-gradient-to-r from-red-600 to-orange-600"
-                  }`}
+            {history.evaluations.map((evaluation) => {
+              const colors = getMarkColors(evaluation.mark);
+              return (
+                <Card
+                  key={evaluation.id}
+                  className={`w-full max-w-md mx-auto border-0 shadow-xl overflow-hidden ${colors.card}`}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div>
-                        <h2 className="text-xl font-bold text-white leading-tight">
-                          {evaluation.studentName}
-                        </h2>
-                      </div>
-                    </div>
-                    {/* {getMarkLabel(evaluation.mark) === "Poor" && ( */}
-                    {/* <div
-                      className="bg-white/20 px-3 py-1 rounded-full flex items-center gap-2 cursor-pointer hover:bg-white/30 transition-colors"
-                      // onClick={() => handleAskMeClick(evaluation.studentName)}
-                    > */}
-                    {/* <MessageCircle className="w-4 h-4 text-white" />
-                      <span className="text-white text-sm font-medium">
-                        Ask Me
-                      </span> */}
-
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          className="h-8 w-8 p-0 bg-white/20 px-3 py-1 rounded flex items-center gap-2 cursor-pointer hover:bg-white/30 transition-colors"
-                        >
-                          <MoreVertical className="h-4 w-4 text-white" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <DropdownMenuItem
-                              onSelect={(e) => e.preventDefault()}
-                            >
-                              Edit
-                            </DropdownMenuItem>
-                          </DialogTrigger>
-                          <EditDialog
-                            evaluation={evaluation}
-                            onSave={handleEdit}
-                          />
-                        </Dialog>
-                        <DropdownMenuItem
-                          className="text-red-600"
-                          onClick={() => handleDelete(evaluation.id)}
-                        >
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                    {/* </div> */}
-                    {/* )} */}
-                  </div>
-                </div>
-
-                {/* Content Section */}
-                <div className="p-6 space-y-4">
-                  {/* Student Details */}
-                  {/* <div className="bg-white/80 rounded-xl p-4 shadow-sm">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="flex items-center gap-2">
-                        <div
-                          className={`bg-blue-500/80 p-2 rounded-lg ${
-                            getMarkLabel(evaluation.mark) === "Great"
-                              ? "bg-blue-500/80"
-                              : getMarkLabel(evaluation.mark) === "Good"
-                              ? "bg-amber-500/80"
-                              : "bg-red-500/80"
-                          }`}
-                        >
-                          <User className="w-4 h-4 text-white" />
-                        </div>
+                  {/* Header Section */}
+                  <div className={`px-4 py-4 ${colors.header}`}>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
                         <div>
-                          <p className="text-xs text-gray-500 uppercase tracking-wide">
-                            Roll No
+                          <h2 className="text-base font-bold text-white leading-tight">
+                            {evaluation.studentName}
+                          </h2>
+                          <p className="text-white/80 text-xs font-normal">
+                            {format(new Date(evaluation.date), "PPp")}
                           </p>
-                          <p className="font-semibold text-gray-800">
+                        </div>
+                      </div>
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            className="h-8 w-8 p-0 bg-white/20 px-3 py-1 rounded flex items-center gap-2 cursor-pointer hover:bg-white/30 transition-colors"
+                          >
+                            <MoreVertical className="h-4 w-4 text-white" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <DropdownMenuItem
+                                onSelect={(e) => e.preventDefault()}
+                              >
+                                Edit
+                              </DropdownMenuItem>
+                            </DialogTrigger>
+                            <EditDialog
+                              evaluation={evaluation}
+                              onSave={handleEdit}
+                            />
+                          </Dialog>
+                          <DeleteDialog
+                            evaluation={{
+                              id: evaluation.id,
+                              studentName: evaluation.studentName,
+                              date: evaluation.date,
+                            }}
+                            onConfirm={handleDelete}
+                          />
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                  </div>
+
+                  {/* Content Section */}
+                  <div className="p-6 space-y-4">
+                    {/* Performance Metrics */}
+                    <div className="bg-white/80 rounded-xl p-4 shadow-sm">
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="text-center">
+                          <div className="flex items-center justify-center gap-2 mb-1">
+                            <User className={`w-4 h-4 ${colors.icon}`} />
+                            <p className="text-xs text-gray-500 uppercase tracking-wide">
+                              Roll No
+                            </p>
+                          </div>
+                          <p className="text-lg font-bold text-gray-800">
                             {evaluation.rollNumber}
                           </p>
                         </div>
-                      </div>
 
-                      <div className="flex items-center gap-2">
-                        <div
-                          className={`bg-blue-500/80 p-2 rounded-lg ${
-                            getMarkLabel(evaluation.mark) === "Great"
-                              ? "bg-blue-500/80"
-                              : getMarkLabel(evaluation.mark) === "Good"
-                              ? "bg-amber-500/80"
-                              : "bg-red-500/80"
-                          }`}
-                        >
-                          <Hash className="w-4 h-4 text-white" />
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500 uppercase tracking-wide">
-                            Admission No
-                          </p>
-                          <p className="font-semibold text-gray-800">
+                        <div className="text-center">
+                          <div className="flex items-center justify-center gap-2 mb-1">
+                            <Hash className={`w-4 h-4 ${colors.icon}`} />
+                            <p className="text-xs text-gray-500 uppercase tracking-wide">
+                              Ad. No
+                            </p>
+                          </div>
+                          <p className="text-lg font-bold text-gray-800">
                             {evaluation.adNumber}
                           </p>
-                        </div> 
-                        
-                      </div>
-                    </div>
-                  </div> */}
-
-                  {/* Performance Metrics */}
-                  <div className="bg-white/80 rounded-xl p-4 shadow-sm">
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="text-center">
-                        <div className="flex items-center justify-center gap-2 mb-1">
-                          <Hash
-                            className={`w-4 h-4 ${
-                              getMarkLabel(evaluation.mark) === "Great"
-                                ? "text-blue-600"
-                                : getMarkLabel(evaluation.mark) === "Good"
-                                ? "text-amber-600"
-                                : "text-red-600"
-                            }`}
-                          />
-                          <p className="text-xs text-gray-500 uppercase tracking-wide">
-                            Sl. No.
-                          </p>
                         </div>
-                        <p className="text-lg font-bold text-gray-800">
-                          {evaluation.rollNumber}
-                        </p>
-                      </div>
 
-                      <div className="text-center">
-                        <div className="flex items-center justify-center gap-2 mb-1">
-                          <User
-                            className={`w-4 h-4 ${
-                              getMarkLabel(evaluation.mark) === "Great"
-                                ? "text-blue-600"
-                                : getMarkLabel(evaluation.mark) === "Good"
-                                ? "text-amber-600"
-                                : "text-red-600"
-                            }`}
-                          />
-                          <p className="text-xs text-gray-500 uppercase tracking-wide">
-                            Ad. No.
-                          </p>
-                        </div>
-                        <p className="text-lg font-bold text-gray-800">
-                          {evaluation.adNumber}
-                        </p>
-                      </div>
-
-                      <div className="text-center">
-                        <div className="flex items-center justify-center gap-2 mb-1">
-                          <ChartBar
-                            className={`w-4 h-4 ${
-                              getMarkLabel(evaluation.mark) === "Great"
-                                ? "text-blue-600"
-                                : getMarkLabel(evaluation.mark) === "Good"
-                                ? "text-amber-600"
-                                : "text-red-600"
-                            }`}
-                          />
-                          <p className="text-xs text-gray-500 uppercase tracking-wide">
-                            Status
-                          </p>
-                        </div>
-                        <p
-                          className={`text-lg font-bold ${
-                            getMarkLabel(evaluation.mark) === "Great"
-                              ? "text-blue-600"
+                        <div className="text-center">
+                          <div className="flex items-center justify-center gap-2 mb-1">
+                            <ChartBar className={`w-4 h-4 ${colors.icon}`} />
+                            <p className="text-xs text-gray-500 uppercase tracking-wide">
+                              Status
+                            </p>
+                          </div>
+                          <p className={`text-lg font-bold ${colors.text}`}>
+                            {getMarkLabel(evaluation.mark) === "Poor"
+                              ? "☹️"
                               : getMarkLabel(evaluation.mark) === "Good"
-                              ? "text-amber-600"
-                              : "text-red-600"
-                          }`}
-                        >
-                          {getMarkLabel(evaluation.mark) === "Great"
-                            ? "🙂"
-                            : getMarkLabel(evaluation.mark) === "Good"
-                            ? "😐"
-                            : "☹️"}{" "}
-                          {getMarkLabel(evaluation.mark)}
-                        </p>
+                              ? "😐"
+                              : "🙂"}{" "}
+                            {getMarkLabel(evaluation.mark)}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Percentage Badge */}
-                  {/* <div className="text-center">
-                    <div
-                      className={`inline-flex items-center gap-2 text-white px-6 py-3 rounded-full shadow-lg ${
-                        getMarkLabel(evaluation.mark) === "Great"
-                          ? "bg-gradient-to-r from-blue-500 to-indigo-500"
-                          : getMarkLabel(evaluation.mark) === "Good"
-                          ? "bg-gradient-to-r from-amber-500 to-orange-500"
-                          : "bg-gradient-to-r from-red-500 to-red-600"
-                      }`}
-                    > */}
-                  {/* <Trophy className="w-5 h-5" /> */}
-                  {/* <span className="text-white text-3xl">
-                        {getMarkLabel(evaluation.mark) === "Great"
-                          ? "🙂"
-                          : getMarkLabel(evaluation.mark) === "Good"
-                          ? "😐"
-                          : "☹️"}
-                      </span>
-                      <span className="font-bold text-lg">
-                        {getMarkLabel(evaluation.mark)}
-                      </span>
-                    </div> */}
-                  {/* </div> */}
-                </div>
-              </Card>
-            ))}
+                    {evaluation.punishment && (
+                      <div className="bg-white/80 rounded-xl p-4 shadow-sm">
+                        <div className="flex items-center justify-center gap-2 mb-1">
+                          <MessageCircle className={`w-4 h-4 ${colors.icon}`} />
+                          <p className="text-xs text-gray-500 uppercase tracking-wide">
+                            Punishment
+                          </p>
+                        </div>
+                        <p className={`text-sm font-medium ${colors.text}`}>
+                          {evaluation.punishment}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              );
+            })}
 
             {history.evaluations.length === 0 && (
               <p className="text-center text-gray-500 py-8">

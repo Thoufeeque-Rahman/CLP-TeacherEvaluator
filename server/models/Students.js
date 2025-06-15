@@ -1,6 +1,10 @@
 const mongoose = require("mongoose");
 
 const studentSchema = new mongoose.Schema({
+  _id: {
+    type: mongoose.Schema.Types.ObjectId,
+    auto: true
+  },
   name: String,
   rollNumber: Number,
   adNumber: Number,

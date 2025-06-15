@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const Student = require("../models/StudentS");
+const mongoose = require("mongoose");
+const Student = require("../models/Students");
 const DvtMarks = require("../models/DvtMarks");
 
 // Add a new student
@@ -60,10 +61,24 @@ router.get("/adNumber/:adNumber", async (req, res) => {
 // Get a student by Id
 router.get("/:id", async (req, res) => {
   try {
+    console.log("Fetching student with ID:", req.params.id);
+    
+    // Validate if the ID is a valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
+      console.log("Invalid ObjectId format");
+      return res.status(400).json({ message: "Invalid student ID format" });
+    }
+
     const student = await Student.findById(req.params.id);
-    if (!student) return res.status(404).json({ message: "Student not found" });
+    if (!student) {
+      console.log("Student not found");
+      return res.status(404).json({ message: "Student not found" });
+    }
+    
+    console.log("Found student:", student);
     res.json(student);
   } catch (err) {
+    console.error("Error fetching student:", err);
     res.status(500).json({ message: err.message });
   }
 });

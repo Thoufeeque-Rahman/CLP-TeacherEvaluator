@@ -7,7 +7,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
 import AuthPage from "@/pages/auth-page";
 import { ProtectedRoute } from "./lib/protected-route";
-import { AuthProvider } from "@/hooks/use-auth";
+import { AuthProvider } from "@/contexts/AuthContext";
 import Dashboard from "./pages/admin/dashboard";
 import History from "@/pages/history";
 import Performance from "@/pages/performance";

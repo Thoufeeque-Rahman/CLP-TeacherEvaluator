@@ -5,19 +5,10 @@ import EvaluationScreen from "@/components/EvaluationScreen";
 import { useToast } from "@/hooks/use-toast";
 import FeedbackToast from "@/components/FeedbackToast";
 import { useQuery } from "@tanstack/react-query";
-import { type Student } from "@shared/schema";
+import { type Student, type SubjectInfo, type ClassInfo } from "@/types";
 import PunishmentModal from "@/components/PunishmentModal";
 import { s } from "vite/dist/node/types.d-aGj9QkWt";
-
-export interface ClassInfo {
-  id: number;
-  name: string;
-}
-
-export interface SubjectInfo {
-  subject: string;
-  class: number;
-}
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Home() {
   const [activeScreen, setActiveScreen] = useState<"start" | "evaluation">(
@@ -30,13 +21,14 @@ export default function Home() {
   const [rounds, setRounds] = useState<
     { studentsNotAsked: string[]; _id: string }[]
   >([]);
-  const [currentStudent, setCurrentStudent] = useState<Student>({} as Student);
+  const { user } = useAuth();
+  const [currentStudent, setCurrentStudent] = useState<Student | null>(null);
   const [punishmentModalOpen, setPunishmentModalOpen] = useState(false);
   const [punishment, setPunishment] = useState<string>();
   const [currentEvaluation, setCurrentEvaluation] = useState<
     "poor" | "good" | "great" | null
   >(null);
-  const [students, setStudents] = useState([]);
+  const [students, setStudents] = useState<Student[]>([]);
   const [currentStudentIndex, setCurrentStudentIndex] = useState(0);
   const { toast } = useToast();
 
@@ -194,7 +186,7 @@ export default function Home() {
     }
     const data = await response.json();
     console.log("Fetched Student:", data);
-    setCurrentStudent(data);
+    setCurrentStudent(data as Student);
     return data;
   };
   // const getRandomStudentIndex = (rounds: { studentsNotAsked: string[] }[]) => {
@@ -364,20 +356,33 @@ export default function Home() {
   };
 
   const submitEvaluation = async (mark: number, punishment?: string) => {
-    if (!selectedSubject || !currentStudent) return;
+    if (!selectedSubject || !currentStudent) {
+      toast({
+        title: "Error",
+        description: "No student or subject selected",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
-      await fetch(`${baseUrl}/api/students/dvtMarks/${currentStudent._id}`, {
+      await fetch(`${baseUrl}/api/dvtMarks`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          studentId: currentStudent._id,
           subject: selectedSubject.subject,
           mark,
           punishment,
         }),
         credentials: "include",
+      });
+
+      toast({
+        title: "Evaluation saved successfully",
+        description: "The student's performance has been recorded.",
       });
     } catch (error) {
       console.error("Failed to submit evaluation:", error);
