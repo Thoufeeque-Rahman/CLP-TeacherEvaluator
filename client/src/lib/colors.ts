@@ -43,7 +43,7 @@ export const performanceColors = {
 export const getPerformanceColors = (percentage: number) => {
   if (percentage >= 80) {
     return performanceColors.excellent;
-  } else if (percentage >= 60) {
+  } else if (percentage >= 50) {
     return performanceColors.good;
   } else {
     return performanceColors.poor;

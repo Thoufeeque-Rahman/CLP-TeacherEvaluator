@@ -131,6 +131,7 @@ export default function Performance() {
       (acc: { [key: string]: DvtMark[] }, mark) => {
         const studentId = mark.studentId;
         console.log(studentId);
+        console.log(acc);
         if (!acc[studentId]) {
           acc[studentId] = [];
         }
