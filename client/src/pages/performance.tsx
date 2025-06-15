@@ -37,7 +37,7 @@ interface StudentPerformance {
   percentage: number;
 }
 
-type SortField = "rollNumber" | "adNumber" | "percentage" | "name";
+type SortField = "rollNumber" | "adNumber" | "percentage" | "name" | "totalQuestions" ;
 type SortDirection = "asc" | "desc";
 
 export default function Performance() {
@@ -152,6 +152,9 @@ export default function Performance() {
           break;
         case "name":
           comparison = a.student.name.localeCompare(b.student.name);
+          break;
+        case "totalQuestions":
+          comparison = a.totalQuestions - b.totalQuestions;
           break;
       }
       return sortDirection === "asc" ? comparison : -comparison;
@@ -275,6 +278,7 @@ export default function Performance() {
                   <SelectItem value="percentage">Percentage</SelectItem>
                   <SelectItem value="adNumber">Admission Number</SelectItem>
                   <SelectItem value="name">Name</SelectItem>
+                  <SelectItem value="totalQuestions">Total Questions</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>

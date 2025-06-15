@@ -36,11 +36,8 @@ export default function StartScreen({
         <h2 className="text-2xl font-bold text-blue-600">
           Daily Viva Tracker
         </h2>
-        <p className="text-gray-600">
-          Select a lesson to begin
-        </p>
-        <p className="font-medium mt-2 text-blue-600">Hey, {user?.name.toUpperCase()}</p>
-      </div>
+        <p className="font-medium mt-2 text-blue-600">Hi, {user?.name.toUpperCase()}</p>
+      </div> 
 
       {/* Subject Selection */}
       <div className="mb-8">
