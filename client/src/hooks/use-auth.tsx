@@ -7,8 +7,18 @@ import {
 } from "react";
 import axios from "axios";
 import { useToast } from "@/hooks/use-toast";
-import { InsertUser, User as SelectUser } from "@shared/schema";
-// import { BASE_URL } from "../../../.env";
+
+interface MongoUser {
+  _id: string;
+  name: string;
+  email: string;
+  phone: string;
+  subjectsTaught: Array<{
+    class: number;
+    subject: string;
+    periodsInSemester?: number;
+  }>;
+}
 
 type LoginData = {
   email: string;
@@ -16,11 +26,11 @@ type LoginData = {
 };
 
 type AuthContextType = {
-  user: SelectUser | null;
+  user: MongoUser | null;
   isLoading: boolean;
   error: string | null;
   login: (credentials: LoginData) => Promise<void>;
-  register: (credentials: InsertUser) => Promise<void>;
+  register: (credentials: { email: string; password: string }) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
 };
@@ -28,24 +38,46 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<SelectUser | null>(null);
+  const [user, setUser] = useState<MongoUser | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
   const BASE_URL = import.meta.env.VITE_BASE_URL;
 
+  // Set up axios interceptor for token
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    }
+
+    return () => {
+      delete axios.defaults.headers.common['Authorization'];
+    };
+  }, []);
+
   // Check authentication status on mount and after window focus
   const checkAuth = async () => {
     try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setUser(null);
+        return null;
+      }
+
       const response = await axios.get(`${BASE_URL}/api/teachers/me`, {
         withCredentials: true,
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
-      console.log("User1:", response.data);
+      
       setUser(response.data);
       return response.data;
     } catch (err) {
       setUser(null);
+      localStorage.removeItem('token');
       return null;
     } finally {
       setIsLoading(false);
@@ -73,8 +105,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         credentials,
         { withCredentials: true }
       );
-      const userData = response.data;
-      setUser(userData);
+      
+      const { teacher, token } = response.data;
+      
+      // Save token
+      localStorage.setItem('token', token);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
+      setUser(teacher);
       toast({ 
         title: "Login successful", 
         description: "Welcome back!" 
@@ -92,16 +130,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (credentials: InsertUser) => {
+  const register = async (credentials: { email: string; password: string }) => {
     try {
       setIsLoading(true);
       const response = await axios.post(
-        `${BASE_URL}/api/register`,
+        `${BASE_URL}/api/teachers/register`,
         credentials,
         { withCredentials: true }
       );
-      const userData = response.data;
-      setUser(userData);
+      
+      const { teacher, token } = response.data;
+      
+      // Save token
+      localStorage.setItem('token', token);
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      
+      setUser(teacher);
       toast({
         title: "Registration successful",
         description: "You have been automatically logged in.",
@@ -126,6 +170,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         {}, 
         { withCredentials: true }
       );
+      
+      // Clear token
+      localStorage.removeItem('token');
+      delete axios.defaults.headers.common['Authorization'];
+      
       setUser(null);
       toast({ title: "Logged out successfully" });
     } catch (err: any) {

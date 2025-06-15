@@ -4,6 +4,7 @@ const cors = require("cors");
 const path = require("path");
 const session = require("express-session");
 const sessionConfig = require("./config/session");
+const cookieParser = require('cookie-parser');
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
 const app = express();
@@ -20,6 +21,7 @@ app.use(
   })
 );
 app.use(express.json());
+app.use(cookieParser());
 
 // Session middleware
 app.use(session(sessionConfig));
@@ -41,11 +43,13 @@ app.get("/api/test", (req, res) => {
 const studentRoutes = require("./routes/students");
 const teachersRoutes = require("./routes/teachers");
 const roundsRoutes = require("./routes/rounds");
+const dvtMarksRoutes = require("./routes/dvtMarks");
 
 // Use routes
 app.use("/api/students", studentRoutes);
 app.use("/api/teachers", teachersRoutes);
 app.use("/api/rounds", roundsRoutes);
+app.use("/api/dvtMarks", dvtMarksRoutes);
 
 app.use(express.static(path.join(__dirname, 'public')));
 

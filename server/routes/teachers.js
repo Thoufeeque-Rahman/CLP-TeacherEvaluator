@@ -3,7 +3,9 @@ const jwt = require('jsonwebtoken');
 const Teachers = require('../models/Teachers');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
+const { authenticateToken } = require('../middleware/auth');
 
+// Public routes
 // Registration
 router.post('/register', async (req, res) => {
   try {
@@ -28,9 +30,20 @@ router.post('/register', async (req, res) => {
 
     await teacher.save();
 
-    // Create session
-    req.session.userId = teacher._id;
-    req.session.email = teacher.email;
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: teacher._id, email: teacher.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    // Set token in cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
 
     // Return teacher data (excluding password)
     const teacherData = teacher.toObject();
@@ -38,7 +51,8 @@ router.post('/register', async (req, res) => {
 
     res.status(201).json({
       message: 'Registration successful',
-      teacher: teacherData
+      teacher: teacherData,
+      token // Include token in response for client storage
     });
   } catch (error) {
     console.error('Registration error:', error);
@@ -68,15 +82,29 @@ router.post('/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // Create session
-    req.session.userId = teacher._id;
-    req.session.email = teacher.email;
+    // Generate JWT token
+    const token = jwt.sign(
+      { id: teacher._id, email: teacher.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    // Set token in cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
 
     // Return teacher data (excluding password)
     const teacherData = teacher.toObject();
     delete teacherData.password;
 
-    res.json(teacherData);
+    res.json({
+      teacher: teacherData,
+      token // Include token in response for client storage
+    });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({ error: 'Login failed' });
@@ -85,23 +113,32 @@ router.post('/login', async (req, res) => {
 
 // Logout
 router.post('/logout', (req, res) => {
-  req.session.destroy((err) => {
-    if (err) {
-      console.error('Logout error:', err);
-      return res.status(500).json({ error: 'Logout failed' });
-    }
+  // Clear the token cookie
+  res.clearCookie('token');
+  
+  // Clear session if it exists
+  if (req.session) {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Logout error:', err);
+        return res.status(500).json({ error: 'Logout failed' });
+      }
+      res.json({ message: 'Logged out successfully' });
+    });
+  } else {
     res.json({ message: 'Logged out successfully' });
-  });
+  }
 });
 
-// Get current teacher (requires authentication)
-router.get('/me', async (req, res) => {
+// Protected routes - require authentication
+// Get current teacher
+router.get('/me', authenticateToken, async (req, res) => {
   try {
-    if (!req.session.userId) {
+    if (!req.user?.id) {
       return res.status(401).json({ error: 'Not authenticated' });
     }
 
-    const teacher = await Teachers.findById(req.session.userId).select('-password');
+    const teacher = await Teachers.findById(req.user.id).select('-password');
     if (!teacher) {
       return res.status(404).json({ error: 'Teacher not found' });
     }
@@ -113,8 +150,8 @@ router.get('/me', async (req, res) => {
   }
 });
 
-// Get all teachers (admin only - you might want to add admin middleware)
-router.get('/', async (req, res) => {
+// Get all teachers (admin only)
+router.get('/', authenticateToken, async (req, res) => {
   try {
     const teachers = await Teachers.find().select('-password');
     res.json(teachers);
@@ -124,18 +161,13 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get a teacher by ID (with authentication check)
-router.get('/:teacherId', async (req, res) => {
+// Get teacher by ID
+router.get('/:teacherId', authenticateToken, async (req, res) => {
   try {
-    if (!req.session.userId) {
-      return res.status(401).json({ error: 'Not authenticated' });
-    }
-
     const teacher = await Teachers.findById(req.params.teacherId).select('-password');
     if (!teacher) {
       return res.status(404).json({ error: 'Teacher not found' });
     }
-
     res.json(teacher);
   } catch (error) {
     console.error('Fetch teacher error:', error);
