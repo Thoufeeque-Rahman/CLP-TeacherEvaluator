@@ -17,7 +17,7 @@ import { GraduationCap } from "lucide-react";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { toast } = useToast();
   const { user, isAuthenticated, login } = useAuth();
@@ -31,7 +31,7 @@ export default function AuthPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!username || !password) {
+    if (!email || !password) {
       toast({
         title: "Missing fields",
         description: "Please fill in all required fields",
@@ -41,7 +41,7 @@ export default function AuthPage() {
     }
 
     try {
-      await login(username, password);
+      await login(email, password);
       toast({
         title: "Login successful",
         description: "Welcome back!",
@@ -83,12 +83,13 @@ export default function AuthPage() {
           <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
+                <Label htmlFor="email">Email</Label>
                 <Input
-                  id="username"
-                  placeholder="Enter your username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  id="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
                 />
               </div>

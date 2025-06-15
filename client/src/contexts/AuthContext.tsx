@@ -53,16 +53,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ email: username, password }),
         credentials: "include",
       });
 
       if (!response.ok) {
-        throw new Error("Login failed");
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Login failed");
       }
 
-      const userData = await response.json();
-      setUser(userData);
+      const data = await response.json();
+      setUser(data.teacher);
     } catch (error) {
       console.error("Login error:", error);
       throw error;
