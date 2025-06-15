@@ -43,7 +43,7 @@ app.get("/api/test", (req, res) => {
 const studentRoutes = require("./routes/students");
 const teachersRoutes = require("./routes/teachers");
 const roundsRoutes = require("./routes/rounds");
-const dvtMarksRoutes = require("./routes/dvtMarks");
+const dvtMarksRoutes = require("./routes/dvtmarks");
 
 // Use routes
 app.use("/api/students", studentRoutes);
