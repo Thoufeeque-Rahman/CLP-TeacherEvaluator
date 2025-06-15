@@ -7,6 +7,12 @@ const sessionConfig = require("./config/session");
 const cookieParser = require('cookie-parser');
 require("dotenv").config({ path: path.resolve(__dirname, "../.env") });
 
+// Check for required environment variables
+if (!process.env.JWT_SECRET) {
+  console.error('JWT_SECRET environment variable is not set');
+  process.env.JWT_SECRET = 'b2e3c059f1cc407f24c4fdfc926d3b33b426888d1b6c55e506cc277098ae5e79'; // Fallback for development
+}
+
 const app = express();
 
 // Middleware
