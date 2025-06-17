@@ -25,7 +25,7 @@ router.get("/", async (req, res) => {
 // Create a new DvtMark
 router.post("/", authenticateToken, async (req, res) => {
   try {
-    const { studentId, subject, mark, class: classNumber, adNumber } = req.body;
+    const { studentId, subject, mark, class: classNumber, adNumber, tId } = req.body;
     console.log(req.body);
     // Find the student
     const student = await Student.findOne({ _id: studentId });
@@ -41,6 +41,7 @@ router.post("/", authenticateToken, async (req, res) => {
       class: classNumber,
       studentId: student._id,
       adNumber,
+      tId,
     }; 
 
     // Create a new DvtMarks document
@@ -51,6 +52,7 @@ router.post("/", authenticateToken, async (req, res) => {
       mark,
       date: new Date(),
       adNumber,
+      tId,
     });
 
     // Save the new DvtMarks document

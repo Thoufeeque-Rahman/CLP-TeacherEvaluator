@@ -12,6 +12,7 @@ interface User {
   email: string;
   phone?: string;
   subjectsTaught: Subject[];
+  tId: string;
 }
 
 interface AuthContextType {

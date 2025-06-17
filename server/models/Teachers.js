@@ -7,6 +7,7 @@ const teacherSchema = new mongoose.Schema({
     email: { type: String, required: false, unique: false, sparse: true }, // Add `sparse: true` to allow multiple nulls
     phone: { type: String, required: true },
     qualification: { type: String, required: false },
+    tId: { type: String, required: false },
     subjectsTaught: [
         {
             class: { type: Number, required: false },

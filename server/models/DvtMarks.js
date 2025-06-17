@@ -29,6 +29,10 @@ const dvtMarksSchema = new mongoose.Schema({
   punishment: {
     type: String,
     required: false
+  },
+  tId: {
+    type: String,
+    required: false
   }
 }, {
   timestamps: true

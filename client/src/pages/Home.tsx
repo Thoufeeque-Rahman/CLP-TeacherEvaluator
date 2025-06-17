@@ -377,6 +377,7 @@ export default function Home() {
           mark,
           adNumber: currentStudent.adNumber,
           class: selectedSubject.class,
+          tId: user?.tId,
           punishment,
         }),
         credentials: "include",

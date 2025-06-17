@@ -37,7 +37,12 @@ interface StudentPerformance {
   percentage: number;
 }
 
-type SortField = "rollNumber" | "adNumber" | "percentage" | "name" | "totalQuestions" ;
+type SortField =
+  | "rollNumber"
+  | "adNumber"
+  | "percentage"
+  | "name"
+  | "totalQuestions";
 type SortDirection = "asc" | "desc";
 
 export default function Performance() {
@@ -191,6 +196,7 @@ export default function Performance() {
           adNumber: selectedStudent.adNumber,
           mark,
           class: classNum,
+          tId: user?.tId,
         }),
       });
       console.log(response);
@@ -279,7 +285,9 @@ export default function Performance() {
                   <SelectItem value="percentage">Percentage</SelectItem>
                   <SelectItem value="adNumber">Admission Number</SelectItem>
                   <SelectItem value="name">Name</SelectItem>
-                  <SelectItem value="totalQuestions">Total Questions</SelectItem>
+                  <SelectItem value="totalQuestions">
+                    Total Questions
+                  </SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>
@@ -333,16 +341,14 @@ export default function Performance() {
                         </h2>
                       </div>
                     </div>
-                    {performance.percentage < 80 && (
-                      <div
-                        className="bg-white/20 px-3 py-1 rounded-full flex items-center text-center gap-2 cursor-pointer hover:bg-white/30 transition-colors justify-end"
-                        onClick={() => handleAskMeClick(performance.student)}
-                      >
-                        <span className="text-white text-sm font-medium">
-                          Ask Me
-                        </span>
-                      </div>
-                    )}
+                    <div
+                      className="bg-white/20 px-3 py-1 rounded-full flex items-center text-center gap-2 cursor-pointer hover:bg-white/30 transition-colors justify-end"
+                      onClick={() => handleAskMeClick(performance.student)}
+                    >
+                      <span className="text-white text-sm font-medium">
+                        Ask Me
+                      </span>
+                    </div>
                   </div>
                 </div>
 

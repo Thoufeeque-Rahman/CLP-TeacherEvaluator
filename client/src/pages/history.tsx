@@ -49,6 +49,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { getMarkColors } from "@/lib/colors";
+import { AskMeModal } from "@/components/AskMeModal";
+import { useToast } from "@/hooks/use-toast";
 
 interface Student {
   _id: string;
@@ -97,6 +99,7 @@ interface DeleteDialogProps {
 }
 
 const EditDialog = ({ evaluation, onSave }: EditDialogProps) => {
+  const { toast } = useToast();
   const [mark, setMark] = useState(evaluation.mark);
   const [punishment, setPunishment] = useState(evaluation.punishment || "");
 
@@ -195,6 +198,7 @@ const DeleteDialog = ({ evaluation, onConfirm }: DeleteDialogProps) => {
 };
 
 export default function History() {
+  const { toast } = useToast();
   const { user } = useAuth();
   const [selectedSubject, setSelectedSubject] = useState<string>("");
   const [history, setHistory] = useState<SubjectHistory | null>(null);
@@ -202,31 +206,32 @@ export default function History() {
   const [students, setStudents] = useState<{ [key: string]: Student }>({});
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const baseUrl = import.meta.env.VITE_BASE_URL;
-
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [isAskMeModalOpen, setIsAskMeModalOpen] = useState(false);
   // Fetch all students when component mounts
+  const fetchStudents = async () => {
+    try {
+      const response = await fetch(`${baseUrl}/api/students`, {
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to fetch students");
+      const data = await response.json();
+      console.log(data);
+      // Convert array to object with _id as key
+      const studentsMap = data.reduce(
+        (acc: { [key: string]: Student }, student: Student) => {
+          acc[student._id] = student;
+          console.log(student._id);
+          return acc;
+        },
+        {}
+      );
+      setStudents(studentsMap);
+    } catch (error) {
+      console.error("Error fetching students:", error);
+    }
+  };
   useEffect(() => {
-    const fetchStudents = async () => {
-      try {
-        const response = await fetch(`${baseUrl}/api/students`, {
-          credentials: "include",
-        });
-        if (!response.ok) throw new Error("Failed to fetch students");
-        const data = await response.json();
-        console.log(data);
-        // Convert array to object with _id as key
-        const studentsMap = data.reduce(
-          (acc: { [key: string]: Student }, student: Student) => {
-            acc[student._id] = student;
-            console.log(student._id);
-            return acc;
-          },
-          {}
-        );
-        setStudents(studentsMap);
-      } catch (error) {
-        console.error("Error fetching students:", error);
-      }
-    };
     fetchStudents();
   }, []);
 
@@ -377,6 +382,61 @@ export default function History() {
     }
   };
 
+  const handleAskMeClick = (adNumber: string) => {
+    console.log(students);
+    const student = Object.values(students).find(
+      (student) => student.adNumber === adNumber
+    );
+    console.log(student);
+    setSelectedStudent(student || null);
+    setIsAskMeModalOpen(true);
+  };
+
+
+  const handleEvaluate = async (mark: number) => {
+    if (!selectedStudent || !user) return;
+
+    const subject = selectedSubject.split("|")[0];
+    const classNum = parseInt(selectedSubject.split("|")[1]);
+
+    try {
+      const response = await fetch(`${baseUrl}/api/dvtmarks`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          studentId: selectedStudent._id,
+          subject: subject,
+          adNumber: selectedStudent.adNumber,
+          mark,
+          class: classNum,
+          tId: user?.tId,
+        }),
+      });
+      console.log(response);
+      if (!response.ok) {
+        throw new Error("Failed to save evaluation");
+      }
+
+      toast({
+        title: "Evaluation Saved",
+        description: `Successfully evaluated ${selectedStudent.name} ${response.status}`,
+      });
+
+      // Refresh the data
+      fetchStudents();
+    } catch (error) {
+      console.error("Error saving evaluation:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save evaluation. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="mx-auto max-w-md bg-white min-h-screen shadow-lg relative h-full flex flex-col">
       <Header showContext={false} onHomeClick={() => {}} />
@@ -461,6 +521,18 @@ export default function History() {
                               evaluation={evaluation}
                               onSave={handleEdit}
                             />
+                          </Dialog>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <DropdownMenuItem
+                                // onSelect={(e) => e.preventDefault()}
+                                onClick={() =>
+                                  handleAskMeClick(evaluation.adNumber)
+                                }
+                              >
+                                Ask Me
+                              </DropdownMenuItem>
+                            </DialogTrigger>
                           </Dialog>
                           <DeleteDialog
                             evaluation={{
@@ -555,6 +627,17 @@ export default function History() {
           </p>
         )}
       </main>
+
+      {selectedStudent && (
+        <AskMeModal
+          isOpen={isAskMeModalOpen}
+          onClose={() => setIsAskMeModalOpen(false)}
+          student={selectedStudent}
+          onEvaluate={handleEvaluate}
+          subject={selectedSubject.split("|")[0]}
+          class={parseInt(selectedSubject.split("|")[1])}
+        />
+      )}
     </div>
   );
 }
