@@ -27,6 +27,7 @@ import {
   Trophy,
   Percent,
   ChartBar,
+  RefreshCw,
 } from "lucide-react";
 import {
   Dialog,
@@ -236,20 +237,20 @@ export default function History() {
   }, []);
 
   // Fetch all DvtMarks when component mounts
+  const fetchDvtMarks = async () => {
+    try {
+      const response = await fetch(`${baseUrl}/api/dvtMarks`, {
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Failed to fetch DvtMarks");
+      const data = await response.json();
+      console.log("Fetched DvtMarks:", data);
+      setDvtMarks(data);
+    } catch (error) {
+      console.error("Error fetching DvtMarks:", error);
+    }
+  };
   useEffect(() => {
-    const fetchDvtMarks = async () => {
-      try {
-        const response = await fetch(`${baseUrl}/api/dvtMarks`, {
-          credentials: "include",
-        });
-        if (!response.ok) throw new Error("Failed to fetch DvtMarks");
-        const data = await response.json();
-        console.log("Fetched DvtMarks:", data);
-        setDvtMarks(data);
-      } catch (error) {
-        console.error("Error fetching DvtMarks:", error);
-      }
-    };
     fetchDvtMarks();
   }, []);
 
@@ -271,12 +272,17 @@ export default function History() {
 
       // Update local state
       setDvtMarks((prevMarks) => prevMarks.filter((mark) => mark._id !== id));
-      toast.success("Evaluation deleted successfully");
+      toast({
+        title: "Evaluation deleted successfully",
+      });
     } catch (error) {
       console.error("Error deleting evaluation:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Failed to delete evaluation"
-      );
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to delete evaluation",
+        variant: "destructive",
+      });
     }
   };
 
@@ -305,12 +311,17 @@ export default function History() {
         prevMarks.map((m) => (m._id === id ? { ...m, mark, punishment } : m))
       );
 
-      toast.success("Evaluation updated successfully");
+      toast({
+        title: "Evaluation updated successfully",
+      });
     } catch (error) {
       console.error("Error updating evaluation:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Failed to update evaluation"
-      );
+      toast({
+        title: "Error",
+        description:
+          error instanceof Error ? error.message : "Failed to update evaluation",
+        variant: "destructive",
+      });
     }
   };
 
@@ -392,7 +403,6 @@ export default function History() {
     setIsAskMeModalOpen(true);
   };
 
-
   const handleEvaluate = async (mark: number) => {
     if (!selectedStudent || !user) return;
 
@@ -437,6 +447,23 @@ export default function History() {
     }
   };
 
+  const handleRefresh = async () => {
+    try {
+      await Promise.all([fetchStudents(), fetchDvtMarks()]);
+      toast({
+        title: "Data Refreshed",
+        description: "Successfully refreshed student data and evaluations.",
+      });
+    } catch (error) {
+      console.error("Error refreshing data:", error);
+      toast({
+        title: "Error",
+        description: "Failed to refresh data. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="mx-auto max-w-md bg-white min-h-screen shadow-lg relative h-full flex flex-col">
       <Header showContext={false} onHomeClick={() => {}} />
@@ -453,6 +480,15 @@ export default function History() {
           >
             <ArrowUpDown className="h-4 w-4" />
             {sortOrder === "asc" ? "Oldest First" : "Newest First"}
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            className="flex items-center gap-2 bg-blue-50 text-blue-600 font-medium border-blue-600 hover:bg-blue-100 hover:text-blue-600 hover:border-blue-600 focus:bg-blue-100 focus:text-blue-600 focus:border-blue-600 focus:outline-none"
+          >
+            <RefreshCw className="h-4 w-4" />
           </Button>
         </div>
 
