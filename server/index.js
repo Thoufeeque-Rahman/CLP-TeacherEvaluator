@@ -56,7 +56,7 @@ const dvtMarksRoutes = require("./routes/dvtmarks");
 app.use("/api/students", studentRoutes);
 app.use("/api/teachers", teachersRoutes);
 app.use("/api/rounds", roundsRoutes);
-app.use("/api/dvtMarks", dvtMarksRoutes);
+app.use("/api/dvtmarks", dvtMarksRoutes);
 
 app.use(express.static(path.join(__dirname, 'public')));
 

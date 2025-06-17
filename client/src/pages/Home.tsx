@@ -366,7 +366,7 @@ export default function Home() {
     }
 
     try {
-      await fetch(`${baseUrl}/api/dvtMarks`, {
+        const response = await fetch(`${baseUrl}/api/dvtmarks`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -375,15 +375,27 @@ export default function Home() {
           studentId: currentStudent._id,
           subject: selectedSubject.subject,
           mark,
+          adNumber: currentStudent.adNumber,
+          class: selectedSubject.class,
           punishment,
         }),
         credentials: "include",
-      });
+      }); 
 
+      const data = await response.json();
+      console.log("Evaluation saved successfully:", data);
+      if (data.success) {
       toast({
         title: "Evaluation saved successfully",
-        description: "The student's performance has been recorded.",
-      });
+          description: "The student's performance has been recorded.",
+        });
+      } else {
+        toast({
+          title: "Failed to save evaluation",
+          description: "Please try again",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error("Failed to submit evaluation:", error);
       toast({

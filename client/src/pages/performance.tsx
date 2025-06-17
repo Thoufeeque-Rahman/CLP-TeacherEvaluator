@@ -179,7 +179,7 @@ export default function Performance() {
     const classNum = parseInt(selectedSubject.split("|")[1]);
 
     try {
-      const response = await fetch(`${baseUrl}/api/dvtMarks`, {
+      const response = await fetch(`${baseUrl}/api/dvtmarks`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -188,6 +188,7 @@ export default function Performance() {
         body: JSON.stringify({
           studentId: selectedStudent._id,
           subject: subject,
+          adNumber: selectedStudent.adNumber,
           mark,
           class: classNum,
         }),

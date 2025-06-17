@@ -11,6 +11,10 @@ const dvtMarksSchema = new mongoose.Schema({
     required: true
   },
   subject: String,
+  adNumber: {
+    type: String,
+    required: true
+  },
   mark: {
     type: Number,
     required: true,
