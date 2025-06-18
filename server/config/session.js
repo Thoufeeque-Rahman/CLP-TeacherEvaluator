@@ -11,7 +11,7 @@ const sessionConfig = {
   saveUninitialized: false,
   store: MongoStore.create({
     mongoUrl: MONGODB_URL,
-    ttl: 7 * 24 * 60 * 60, // Session TTL (1 week)
+    ttl: 30 * 24 * 60 * 60, // Session TTL (30 days)
     autoRemove: 'native',
     touchAfter: 24 * 3600, // time period in seconds
     mongoOptions: {
@@ -23,7 +23,7 @@ const sessionConfig = {
     httpOnly: true,
     secure: true, // Always use secure cookies in production
     sameSite: 'none', // Allow cross-site cookies
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
   },
   name: 'sid', // Change the cookie name from 'connect.sid'
 };
