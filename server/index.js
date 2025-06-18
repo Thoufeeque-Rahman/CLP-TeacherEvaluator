@@ -66,11 +66,24 @@ const MONGODB_URL = process.env.MONGODB_URL || 'mongodb+srv://rahmanam90:9946337
 // Connect to MongoDB with updated options
 mongoose
   .connect(MONGODB_URL, {
-    serverSelectionTimeoutMS: 10000,
+    serverSelectionTimeoutMS: 30000, // Increased timeout
     socketTimeoutMS: 45000,
+    connectTimeoutMS: 30000,
+    maxPoolSize: 10,
+    retryWrites: true,
+    w: 'majority',
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
   })
   .then(() => console.log("MongoDB connected successfully"))
-  .catch((err) => console.error("MongoDB connection error:", err));
+  .catch((err) => {
+    console.error("MongoDB connection error:", err);
+    console.log("Please check:");
+    console.log("1. Your internet connection");
+    console.log("2. MongoDB Atlas cluster status");
+    console.log("3. IP whitelist in MongoDB Atlas");
+    console.log("4. Connection string validity");
+  });
 
 // Then static files
 app.use(express.static(path.join(__dirname, '../client/dist')));

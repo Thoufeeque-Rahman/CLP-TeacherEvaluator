@@ -65,6 +65,54 @@ export default function StartScreen({
     }
   };
 
+  const colorClasses = [
+    {
+      bg: "from-blue-500 to-blue-600",
+      border: "from-blue-50 to-blue-100",
+      text: "text-blue-800",
+    },
+    {
+      bg: "from-green-500 to-green-600",
+      border: "from-green-50 to-green-100",
+      text: "text-green-800",
+    },
+    {
+      bg: "from-orange-500 to-orange-600",
+      border: "from-orange-50 to-orange-100",
+      text: "text-orange-800",
+    },
+    {
+      bg: "from-yellow-500 to-yellow-600",
+      border: "from-yellow-50 to-yellow-100",
+      text: "text-yellow-800",
+    },
+    {
+      bg: "from-purple-500 to-purple-600",
+      border: "from-purple-50 to-purple-100",
+      text: "text-purple-800",
+    },
+    {
+      bg: "from-pink-500 to-pink-600",
+      border: "from-pink-50 to-pink-100",
+      text: "text-pink-800",
+    },
+    {
+      bg: "from-red-500 to-red-600",
+      border: "from-red-50 to-red-100",
+      text: "text-red-800",
+    },
+    {
+      bg: "from-indigo-500 to-indigo-600",
+      border: "from-indigo-50 to-indigo-100",
+      text: "text-indigo-800",
+    },
+    {
+      bg: "from-cyan-500 to-cyan-600",
+      border: "from-cyan-50 to-cyan-100",
+      text: "text-cyan-800",
+    },
+  ];
+
   return (
     <div className="p-6 transition-all duration-300 transform">
       <div className="text-center mb-8 mt-4">
@@ -78,7 +126,7 @@ export default function StartScreen({
       </div>
 
       {/* Subject Selection */}
-      <div className="mb-8">
+      <div className="mb-8 bg-white p-6 rounded-lg shadow-lg">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Select Lesson
         </label>
@@ -86,11 +134,12 @@ export default function StartScreen({
           {user?.subjectsTaught?.map((subject, index) => (
             <button
               key={index}
-              className={`border border-gray-200 rounded-lg py-3 px-4 text-center hover:bg-gray-50 focus:outline-none transition-all`}
-              style={{
-                backgroundColor: `hsl(${(index * 40) % 360}, 70%, 90%)`,
-                borderColor: `hsl(${(index * 40) % 360}, 70%, 50%)`,
-              }}
+              className={`border bg-gradient-to-r ${colorClasses[index].bg} text-white font-medium border-gray-200 rounded-lg py-3 px-4 text-center hover:bg-gray-50 focus:outline-none transition-all`}
+              // style={{
+              //   backgroundColor: `hsl(${(index * 40) % 360}, 70%, 90%)`,
+              //   borderColor: `hsl(${(index * 40) % 360}, 70%, 50%)`,
+              //   color: `hsl(${(index * 40) % 360}, 70%, 20%)`,
+              // }}
               onClick={() => {
                 onSubjectSelect({
                   subject: subject.subject,

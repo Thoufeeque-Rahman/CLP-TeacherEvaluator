@@ -102,7 +102,7 @@ const DvtMarksTable: React.FC = () => {
     if (dateString === today.toISOString().split("T")[0]) {
       return "Today";
     } else if (dateString === yesterday.toISOString().split("T")[0]) {
-      return "Yesterday";
+      return "Y.day";
     } else {
       return date.toLocaleDateString("en-US", {
         weekday: "short",
@@ -177,7 +177,7 @@ const DvtMarksTable: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-3">
         <h2 className="text-xl font-bold text-gray-800 mb-2 sm:mb-0">
-          DV Periods Summary
+          DV Period Stats
         </h2>
         
         {/* Controls
@@ -235,7 +235,7 @@ const DvtMarksTable: React.FC = () => {
         <table className="w-full border-collapse border border-gray-300 rounded-lg overflow-hidden">
           <thead>
             <tr className="bg-gray-50">
-              <th className="border border-gray-300 px-1 py-3 text-left font-semibold text-gray-700">
+              <th className="border border-gray-300 px-1 py-3 text-left font-semibold text-gray-700 min-w-[72px]">
                 Class ➡️ Day ⬇️
               </th>
               {classes.map((classNum: number) => (
@@ -246,9 +246,9 @@ const DvtMarksTable: React.FC = () => {
                   {classNum}
                 </th>
               ))}
-              {/* <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-gray-700">
-                Total
-              </th> */}
+              <th className="border border-gray-300 px-4 py-3 text-center font-semibold text-gray-700">
+                Tot.
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -285,9 +285,9 @@ const DvtMarksTable: React.FC = () => {
                     </td>
                   );
                 })}
-                {/* <td className="border border-gray-300 px-4 py-3 text-center font-bold text-gray-800">
+                <td className="border border-gray-300 px-4 py-3 text-center font-bold text-gray-800">
                   {getTotalForDay(dayData)}
-                </td> */}
+                </td>
               </tr>
             ))}
           </tbody>

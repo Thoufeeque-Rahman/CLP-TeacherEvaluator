@@ -52,7 +52,7 @@ export default function Header({
                 showContext ? "opacity-100" : "opacity-0"
               }`}
             >
-              <span>{selectedSubject} </span>
+              <span>{selectedSubject}</span>
             </div> 
           </div>
         </div>

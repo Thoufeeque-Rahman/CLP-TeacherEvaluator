@@ -104,12 +104,12 @@ export default function EvaluationScreen({
               {/* totalStudents */}
             </span>
           </div>
-          <Progress value={progressPercent} className="w-full h-2.5" />
+          <Progress value={progressPercent} className="w-full h-2.5 shadow-lg" />
         </div>
         <div className="flex-none">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-10 w-10 p-0">
+              <Button variant="ghost" size="icon" className="h-10 w-10 p-0 bg-secondary hover:bg-secondary/50 focus:bg-secondary/50">
                 <EllipsisVertical className="h-6 w-6" />
                 <span className="sr-only">Open menu</span>
               </Button>
@@ -157,9 +157,9 @@ export default function EvaluationScreen({
 
       <div className="relative">
         <Input
-          className="mb-6"
+          className="mb-6 rounded-xl bg-gradient-to-br shadow-lg from-blue-50 to-indigo-100 text-indigo-500 font-medium placeholder:text-indigo-500/90 border-blue-600 hover:bg-blue-100 hover:text-indigo-500 hover:border-blue-600 focus:bg-blue-100 focus:text-indigo-500 focus:border-blue-600 focus:outline-none"
           placeholder="🔎 Search Student"
-          value={searchQuery}
+          value={searchQuery.toUpperCase()}
           onChange={(e) => {
             setSearchQuery(e.target.value);
             setShowSearchResults(true);
@@ -209,23 +209,23 @@ export default function EvaluationScreen({
         </h4>
         <div className="grid grid-cols-3 gap-3">
           <button
-            className={`flex flex-col items-center p-3 bg-white rounded-lg border border-gray-200 hover:bg-green-50 transition-all ${
-              currentEvaluation === "great" ? "ring-2 ring-green-500" : ""
+            className={`flex flex-col items-center p-3 bg-gradient-to-r from-emerald-500 to-green-600 rounded-xl shadow-lg hover:bg-green-50 transition-all ${
+              currentEvaluation === "great" ? "ring-2 ring-emerald-500" : ""
             }`}
             onClick={() => {
               onEvaluate("great");
               setStatus("great");
             }}
-          >
-            <div className="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center mb-2">
+          > 
+            <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mb-1">
               {/* <Star className="text-white w-5 h-5" /> */}
-              <span className="text-white text-3xl">🙂</span>
+              <span className="text-white text-4xl">☺️</span>
             </div>  
-            <span className="text-sm font-medium">Great</span>
+            <span className="text-base font-medium text-white">Great</span>
           </button>
 
           <button
-            className={`flex flex-col items-center p-3 bg-white rounded-lg border border-gray-200 hover:bg-yellow-50 transition-all ${
+            className={`flex flex-col items-center p-3 bg-gradient-to-r from-yellow-500 to-amber-600 rounded-xl shadow-lg hover:bg-yellow-50 transition-all ${
               currentEvaluation === "good" ? "ring-2 ring-yellow-500" : ""
             }`}
             onClick={() => {
@@ -234,15 +234,15 @@ export default function EvaluationScreen({
               setStatus("good");
             }}
           >
-            <div className="w-12 h-12 rounded-full bg-yellow-400 flex items-center justify-center mb-2">
+            <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mb-1">
               {/* <ThumbsUp className="text-white w-5 h-5" /> */}
-              <span className="text-white text-3xl">😐</span>
+              <span className="text-white text-4xl">🙂</span>
             </div>
-            <span className="text-sm font-medium">Good</span>
+            <span className="text-base font-medium text-white">Good</span>
           </button>
 
           <button
-            className={`flex flex-col items-center p-3 bg-white rounded-lg border border-gray-200 hover:bg-red-50 transition-all ${
+            className={`flex flex-col items-center p-3 bg-gradient-to-r from-rose-500 to-red-600 rounded-xl shadow-lg hover:bg-red-50 transition-all ${
               currentEvaluation === "poor" ? "ring-2 ring-red-500" : ""
             }`}
             onClick={() => {
@@ -251,11 +251,11 @@ export default function EvaluationScreen({
               setStatus("poor");
             }}
           >
-            <div className="w-12 h-12 rounded-full bg-destructive flex items-center justify-center mb-2">
+            <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mb-1">
               {/* <ThumbsDown className="text-white w-5 h-5" /> */}
-              <span className="text-white text-3xl">☹️</span> 
+              <span className="text-white text-4xl">☹️</span> 
             </div>
-            <span className="text-sm font-medium">Poor</span>
+            <span className="text-base font-medium text-white">Poor</span>
           </button>
         </div>
       </div>
@@ -278,14 +278,14 @@ export default function EvaluationScreen({
           <div className="flex w-full space-x-3">
             <Button
               variant="outline"
-              className="flex-1 py-3 border border-gray-300 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+              className="flex-1 py-3 bg-blue-500 text-white shadow-md rounded-xl border-0 font-medium hover:bg-blue-500 hover:text-white transition-colors"
               onClick={onSkip}
             >
               Skip
-            </Button>
+            </Button> 
             <Button
               variant="outline"
-              className="flex-1 py-3 border border-destructive text-destructive rounded-lg font-medium hover:bg-destructive hover:text-white transition-colors"
+              className="flex-1 py-3 bg-red-500 shadow-md rounded-xl text-white border-0 font-medium hover:bg-destructive hover:text-white transition-colors"
               onClick={onFinish}
             >
               Finish Evaluation
