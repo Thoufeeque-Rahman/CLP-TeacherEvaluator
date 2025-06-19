@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { GraduationCap, ArrowRight } from "lucide-react";
+import { GraduationCap, ArrowRight, User } from "lucide-react";
 import { ClassInfo, SubjectInfo } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 import { Redirect } from "wouter";
@@ -115,13 +115,18 @@ export default function StartScreen({
 
   return (
     <div className="p-6 transition-all duration-300 transform">
-      <div className="text-center mb-8 mt-4">
-        <div className="bg-blue-500 inline-block p-3 rounded-full mb-4">
-          <GraduationCap className="text-white w-6 h-6" />
-        </div>
-        <h2 className="text-2xl font-bold text-blue-600">Daily Viva Tracker</h2>
+      <div className="text-start mb-8 mt-4 flex gap-3 items-center">
+        {/* <div className="bg-blue-500 inline-block p-3 rounded-full">
+          <User className="text-white w-3 h-3" />
+        </div> */}
+        {/*<h2 className="text-2xl font-bold text-blue-600">Daily Viva Tracker</h2> */}
         <p className="font-medium mt-2 text-blue-600">
-          Hi, {user?.name.toUpperCase()}
+          Hi,{" "}
+          {user?.name
+            ? user.name.charAt(0).toUpperCase() +
+              user.name.slice(1).toLowerCase()
+            : "there"}
+          !
         </p>
       </div>
 
