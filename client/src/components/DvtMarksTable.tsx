@@ -43,9 +43,15 @@ type ColorClass =
   | "bg-green-100 text-green-800";
 
 const getPercentageColorClass = (percentage: number): string => {
-  if (percentage < 25) return "bg-emerald-300";
-  if (percentage < 50) return "bg-emerald-400";
-  if (percentage < 75) return "bg-emerald-500";
+  if (percentage < 20) return "bg-red-300";
+  if (percentage < 30) return "bg-red-400";
+  if (percentage < 40) return "bg-red-500";
+  if (percentage < 50) return "bg-yellow-300";
+  if (percentage < 60) return "bg-yellow-400";
+  if (percentage < 70) return "bg-yellow-500";
+  if (percentage < 80) return "bg-emerald-300";
+  if (percentage < 90) return "bg-emerald-400";
+  if (percentage < 99) return "bg-emerald-500";
   return "bg-emerald-600";
 };
 
@@ -315,7 +321,7 @@ const DvtMarksTable: React.FC = () => {
                               percentage
                             )} h-1.5 rounded-full`}
                             style={{}}
-                          ></div>
+                          ><p className="text-xs">{percentage.toFixed(0)}</p></div>
                         </div>
                       ) : (
                         <div className="mt-1 w-full bg-gray-200 rounded h-1.5 dark:bg-gray-700">
@@ -379,6 +385,52 @@ const DvtMarksTable: React.FC = () => {
         <div className="flex items-center gap-1">
           <span className="inline-block w-4 h-4 bg-green-100 rounded"></span>
           <span className="text-gray-600">Excellent (8+)</span>
+        </div>
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-4 text-sm">
+        <div className="flex items-center gap-2">
+          <span className="text-gray-600">Performance Legend:</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="inline-block w-4 h-4 bg-red-300 rounded"></span>
+          <span className="text-gray-600">Below 20%</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="inline-block w-4 h-4 bg-red-400 rounded"></span>
+          <span className="text-gray-600">20% - 29%</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="inline-block w-4 h-4 bg-red-500 rounded"></span>
+          <span className="text-gray-600">30% - 39%</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="inline-block w-4 h-4 bg-yellow-300 rounded"></span>
+          <span className="text-gray-600">40% - 49%</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="inline-block w-4 h-4 bg-yellow-400 rounded"></span>
+          <span className="text-gray-600">50% - 59%</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="inline-block w-4 h-4 bg-yellow-500 rounded"></span>
+          <span className="text-gray-600">60% - 69%</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="inline-block w-4 h-4 bg-emerald-300 rounded"></span>
+          <span className="text-gray-600">70% - 79%</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="inline-block w-4 h-4 bg-emerald-400 rounded"></span>
+          <span className="text-gray-600">80% - 89%</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="inline-block w-4 h-4 bg-emerald-500 rounded"></span>
+          <span className="text-gray-600">90% - 98%</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <span className="inline-block w-4 h-4 bg-emerald-600 rounded"></span>
+          <span className="text-gray-600">99% and above</span>
         </div>
       </div>
 
