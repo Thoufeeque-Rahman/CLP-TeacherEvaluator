@@ -393,43 +393,43 @@ const DvtMarksTable: React.FC = () => {
           <span className="text-gray-600">Performance Legend:</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="inline-block w-4 h-4 bg-red-300 rounded"></span>
+          <span className="inline-block w-5 h-1.5 bg-red-300 rounded"></span>
           <span className="text-gray-600">Below 20%</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="inline-block w-4 h-4 bg-red-400 rounded"></span>
+          <span className="inline-block w-5 h-1.5 bg-red-400 rounded"></span>
           <span className="text-gray-600">20% - 29%</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="inline-block w-4 h-4 bg-red-500 rounded"></span>
+          <span className="inline-block w-5 h-1.5 bg-red-500 rounded"></span>
           <span className="text-gray-600">30% - 39%</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="inline-block w-4 h-4 bg-yellow-300 rounded"></span>
+          <span className="inline-block w-5 h-1.5 bg-yellow-300 rounded"></span>
           <span className="text-gray-600">40% - 49%</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="inline-block w-4 h-4 bg-yellow-400 rounded"></span>
+          <span className="inline-block w-5 h-1.5 bg-yellow-400 rounded"></span>
           <span className="text-gray-600">50% - 59%</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="inline-block w-4 h-4 bg-yellow-500 rounded"></span>
+          <span className="inline-block w-5 h-1.5 bg-yellow-500 rounded"></span>
           <span className="text-gray-600">60% - 69%</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="inline-block w-4 h-4 bg-emerald-300 rounded"></span>
+          <span className="inline-block w-5 h-1.5 bg-emerald-300 rounded"></span>
           <span className="text-gray-600">70% - 79%</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="inline-block w-4 h-4 bg-emerald-400 rounded"></span>
+          <span className="inline-block w-5 h-1.5 bg-emerald-400 rounded"></span>
           <span className="text-gray-600">80% - 89%</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="inline-block w-4 h-4 bg-emerald-500 rounded"></span>
+          <span className="inline-block w-5 h-1.5 bg-emerald-500 rounded"></span>
           <span className="text-gray-600">90% - 98%</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="inline-block w-4 h-4 bg-emerald-600 rounded"></span>
+          <span className="inline-block w-5 h-1.5 bg-emerald-600 rounded"></span>
           <span className="text-gray-600">99% and above</span>
         </div>
       </div>
