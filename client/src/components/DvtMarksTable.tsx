@@ -3,8 +3,14 @@ import { Calendar, RefreshCw, Download } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 // Type definitions
+interface ClassData {
+  count: number;
+  totalMarks: number;
+  questionCount: number;
+}
+
 interface ClassCounts {
-  [key: number]: number;
+  [key: number]: ClassData;
 }
 
 interface DayData {
@@ -35,6 +41,13 @@ type ColorClass =
   | "bg-yellow-100 text-yellow-800"
   | "bg-blue-100 text-blue-800"
   | "bg-green-100 text-green-800";
+
+const getPercentageColorClass = (percentage: number): string => {
+  if (percentage < 25) return "bg-emerald-300";
+  if (percentage < 50) return "bg-emerald-400";
+  if (percentage < 75) return "bg-emerald-500";
+  return "bg-emerald-600";
+};
 
 const DvtMarksTable: React.FC = () => {
   const [tableData, setTableData] = useState<DayData[]>([]);
@@ -120,14 +133,14 @@ const DvtMarksTable: React.FC = () => {
 
   const getTotalForDay = (dayData: DayData): number => {
     return classes.reduce(
-      (total, classNum) => total + (dayData.classes[classNum] || 0),
+      (total, classNum) => total + (dayData.classes[classNum]?.count || 0),
       0
     );
   };
 
   const getTotalForClass = (classNum: number): number => {
     return tableData.reduce(
-      (total, day) => total + (day.classes[classNum] || 0),
+      (total, day) => total + (day.classes[classNum]?.count || 0),
       0
     );
   };
@@ -139,7 +152,7 @@ const DvtMarksTable: React.FC = () => {
       ...tableData.map((row) =>
         [
           row.date,
-          ...classes.map((c) => row.classes[c] || 0),
+          ...classes.map((c) => row.classes[c]?.count || 0),
           getTotalForDay(row),
         ].join(",")
       ),
@@ -177,7 +190,7 @@ const DvtMarksTable: React.FC = () => {
         <h2 className="text-xl font-bold text-gray-800 mb-2 sm:mb-0">
           DV Period Stats
         </h2>
-        
+
         {/* Controls
         <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
           <div className="flex gap-2 items-center">
@@ -229,7 +242,7 @@ const DvtMarksTable: React.FC = () => {
       )} */}
 
       {/* Table */}
-      <div className="overflow-x-auto">
+      <div className="overflow-auto h-[350px] thin-scrollbar">
         <table className="w-full border-collapse border border-gray-300 rounded-lg overflow-hidden">
           <thead>
             <tr className="bg-gray-50">
@@ -259,19 +272,34 @@ const DvtMarksTable: React.FC = () => {
                   {formatDate(dayData.date)}
                   <div className="text-xs text-gray-500 mt-1">
                     {/* {dayData.date} */}
-                    {new Date(dayData.date).toLocaleDateString('en-GB', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: '2-digit'
-                    }).replace(/\//g, '-')}
+                    {new Date(dayData.date)
+                      .toLocaleDateString("en-GB", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        year: "2-digit",
+                      })
+                      .replace(/\//g, "-")}
                   </div>
                 </td>
                 {classes.map((classNum: number) => {
-                  const count: number = dayData.classes[classNum] || 0;
+                  const classData = dayData.classes[classNum] || {
+                    count: 0,
+                    totalMarks: 0,
+                    questionCount: 0,
+                  };
+                  const count = classData.count;
+                  const totalMarks = classData.totalMarks;
+                  const questionCount = classData.questionCount;
+                  const maxPossibleMarks = questionCount * 2;
+                  const percentage =
+                    maxPossibleMarks > 0
+                      ? (totalMarks / maxPossibleMarks) * 100
+                      : 0;
+
                   return (
                     <td
                       key={classNum}
-                      className="border border-gray-300 px-1 py-3 text-center"
+                      className="border border-gray-300 px-2 py-3 text-center"
                     >
                       <span
                         className={`inline-block px-2 py-1 rounded text-sm font-medium ${getColorClass(
@@ -280,6 +308,23 @@ const DvtMarksTable: React.FC = () => {
                       >
                         {count}
                       </span>
+                      {count > 0 ? (
+                        <div className="mt-1 w-full bg-gray-200 rounded h-1.5 dark:bg-gray-700">
+                          <div
+                            className={`${getPercentageColorClass(
+                              percentage
+                            )} h-1.5 rounded-full`}
+                            style={{}}
+                          ></div>
+                        </div>
+                      ) : (
+                        <div className="mt-1 w-full bg-gray-200 rounded h-1.5 dark:bg-gray-700">
+                          <div
+                            className={`bg-gray-100 h-1.5 rounded-full`}
+                            style={{}}
+                          ></div>
+                        </div>
+                      )}
                     </td>
                   );
                 })}

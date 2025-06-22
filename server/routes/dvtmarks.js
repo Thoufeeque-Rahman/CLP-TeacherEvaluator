@@ -155,13 +155,17 @@ async function getDvtMarksTable(startDate, endDate) {
             },
             class: "$class"
           },
-          subjectCount: { $addToSet: "$subject" } // Get unique subjects per day per class
+          subjectCount: { $addToSet: "$subject" },
+          totalMarks: { $sum: "$mark" },
+          questionCount: { $sum: 1 }
         }
       },
       {
         $project: {
           _id: 1,
-          subjectCount: { $size: "$subjectCount" } // Count unique subjects
+          subjectCount: { $size: "$subjectCount" },
+          totalMarks: 1,
+          questionCount: 1
         }
       },
       {
@@ -170,13 +174,15 @@ async function getDvtMarksTable(startDate, endDate) {
           classes: {
             $push: {
               class: "$_id.class",
-              count: "$subjectCount"
+              count: "$subjectCount",
+              totalMarks: "$totalMarks",
+              questionCount: "$questionCount"
             }
           }
         }
       },
       {
-        $sort: { "_id": 1 } // Sort by date
+        $sort: { "_id": 1 }
       }
     ]);
 
@@ -199,12 +205,16 @@ function formatToTable(aggregatedData, classes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     
     // Initialize all classes with 0
     classes.forEach(classNum => {
-      row.classes[classNum] = 0;
+      row.classes[classNum] = { count: 0, totalMarks: 0, questionCount: 0 };
     });
     
     // Fill in actual counts
     dayData.classes.forEach(classData => {
-      row.classes[classData.class] = classData.count;
+      row.classes[classData.class] = {
+        count: classData.count,
+        totalMarks: classData.totalMarks,
+        questionCount: classData.questionCount
+      };
     });
     
     tableData.push(row);

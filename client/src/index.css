@@ -57,3 +57,23 @@
   }
 }
 
+/* Thin custom scrollbar */
+.thin-scrollbar {
+  scrollbar-width: thin;           /* Firefox */
+  scrollbar-color: #ade3d29b #e5e7eb43; /* Emerald-600 and gray-200 for Firefox */
+}
+
+.thin-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background: #ade3d29b; /* Emerald-600 */
+  border-radius: 50px;
+}
+
+.thin-scrollbar::-webkit-scrollbar-track {
+  background: #e5e7eb00; /* Tailwind gray-200 */
+  border-radius: 50px; 
+}

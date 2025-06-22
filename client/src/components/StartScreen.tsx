@@ -114,7 +114,7 @@ export default function StartScreen({
   ];
 
   return (
-    <div className="p-6 transition-all duration-300 transform">
+    <div className="p-6 transition-all duration-300 transform bg-white shadow-lg">
       <div className="text-start mb-8 mt-4 flex gap-3 items-center">
         {/* <div className="bg-blue-500 inline-block p-3 rounded-full">
           <User className="text-white w-3 h-3" />
@@ -126,12 +126,12 @@ export default function StartScreen({
             ? user.name.charAt(0).toUpperCase() +
               user.name.slice(1).toLowerCase()
             : "there"}
-          !
+           👋!
         </p>
       </div>
 
       {/* Subject Selection */}
-      <div className="mb-8 bg-white p-6 rounded-lg shadow-lg">
+      <div className="mb-8 bg-white p-3 rounded-lg shadow-lg">
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Select Lesson
         </label>
