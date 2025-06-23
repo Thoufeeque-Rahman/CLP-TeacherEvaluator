@@ -46,9 +46,9 @@ const getPercentageColorClass = (percentage: number): string => {
   if (percentage < 20) return "bg-red-500";
   if (percentage < 30) return "bg-red-400";
   if (percentage < 40) return "bg-red-200";
-  if (percentage < 50) return "bg-orange-500";
-  if (percentage < 60) return "bg-orange-400";
-  if (percentage < 70) return "bg-orange-200";
+  if (percentage < 50) return "bg-yellow-500";
+  if (percentage < 60) return "bg-yellow-400";
+  if (percentage < 70) return "bg-yellow-200";
   if (percentage < 80) return "bg-emerald-300";
   if (percentage < 90) return "bg-emerald-400";
   return "bg-emerald-500";
@@ -413,15 +413,15 @@ const DvtMarksTable: React.FC = () => {
           <span className="text-gray-600">30% - 39%</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="inline-block w-5 h-1.5 bg-orange-500 rounded"></span>
+          <span className="inline-block w-5 h-1.5 bg-yellow-500 rounded"></span>
           <span className="text-gray-600">40% - 49%</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="inline-block w-5 h-1.5 bg-orange-400 rounded"></span>
+          <span className="inline-block w-5 h-1.5 bg-yellow-400 rounded"></span>
           <span className="text-gray-600">50% - 59%</span>
         </div>
         <div className="flex items-center gap-1">
-          <span className="inline-block w-5 h-1.5 bg-orange-300 rounded"></span>
+          <span className="inline-block w-5 h-1.5 bg-yellow-300 rounded"></span>
           <span className="text-gray-600">60% - 69%</span>
         </div>
         <div className="flex items-center gap-1">
