@@ -365,8 +365,8 @@ const DvtMarksTable: React.FC = () => {
       {/* Description */}
       <div className="mt-4 text-gray-700 text-sm">
         This table shows the count of periods (questions asked) in each class
-        for each day. The colored bar below each count visually represents the
-        performance percentage for that class on that day.
+        for each day. The colored bar below visually represents the
+        performance of that class on that day.
       </div>
 
       {/* Legend */}
