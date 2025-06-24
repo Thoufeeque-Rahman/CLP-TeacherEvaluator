@@ -13,7 +13,7 @@ import {
 } from "./ui/table";
 import { useEffect, useState } from "react";
 import { toast } from "@/hooks/use-toast";
-import DvtMarksTable from "./DvtMarksTable";
+import DvtMarksTable from "./DvtMarksTable copy";
 
 interface StartScreenProps {
   selectedClass: ClassInfo | null;

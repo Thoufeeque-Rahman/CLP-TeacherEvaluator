@@ -144,48 +144,45 @@ async function getDvtMarksTable(startDate, endDate) {
           }
         }
       },
+      // Group by date, class, and subject
       {
         $group: {
           _id: {
-            date: {
-              $dateToString: {
-                format: "%Y-%m-%d",
-                date: "$date"
-              }
-            },
-            class: "$class"
+            date: { $dateToString: { format: "%Y-%m-%d", date: "$date" } },
+            class: "$class",
+            subject: "$subject"
           },
-          subjectCount: { $addToSet: "$subject" },
           totalMarks: { $sum: "$mark" },
           questionCount: { $sum: 1 }
         }
       },
-      {
-        $project: {
-          _id: 1,
-          subjectCount: { $size: "$subjectCount" },
-          totalMarks: 1,
-          questionCount: 1
-        }
-      },
+      // Group by date and class, collect subjects
       {
         $group: {
-          _id: "$_id.date",
-          classes: {
+          _id: { date: "$_id.date", class: "$_id.class" },
+          subjects: {
             $push: {
-              class: "$_id.class",
-              count: "$subjectCount",
+              subject: "$_id.subject",
               totalMarks: "$totalMarks",
               questionCount: "$questionCount"
             }
           }
         }
       },
+      // Group by date, collect classes
       {
-        $sort: { "_id": 1 }
-      }
+        $group: {
+          _id: "$_id.date",
+          classes: {
+            $push: {
+              class: "$_id.class",
+              subjects: "$subjects"
+            }
+          }
+        }
+      },
+      { $sort: { "_id": 1 } }
     ]);
-
     return result;
   } catch (error) {
     console.error('Error fetching DVT marks:', error);
@@ -196,30 +193,23 @@ async function getDvtMarksTable(startDate, endDate) {
 // Function to format data into table structure
 function formatToTable(aggregatedData, classes = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]) {
   const tableData = [];
-  
   aggregatedData.forEach(dayData => {
     const row = {
       date: dayData._id,
       classes: {}
     };
-    
-    // Initialize all classes with 0
+    // Initialize all classes with empty subject array
     classes.forEach(classNum => {
-      row.classes[classNum] = { count: 0, totalMarks: 0, questionCount: 0 };
+      row.classes[classNum] = { subjects: [] };
     });
-    
-    // Fill in actual counts
+    // Fill in actual data
     dayData.classes.forEach(classData => {
       row.classes[classData.class] = {
-        count: classData.count,
-        totalMarks: classData.totalMarks,
-        questionCount: classData.questionCount
+        subjects: classData.subjects
       };
     });
-    
     tableData.push(row);
   });
-  
   return tableData;
 }
 
