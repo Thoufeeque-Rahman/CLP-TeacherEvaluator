@@ -349,7 +349,7 @@ const DvtMarksTable: React.FC = () => {
                     >
                       {/* Badge fixed in top right */}
                       <span
-                        className={`absolute top-1 right-1 inline-block px-2 py-0.25 rounded-full text-[10px] font-semibold text-white ${getPercentageColorClass(overallPercentage)}`}
+                        className={`absolute top-1 right-1 inline-block px-2 py-0.25 rounded-full text-[10px] font-semibold ${getColorClass(classData.subjects.length)}`}
                         style={{ zIndex: 1 }}
                       >
                         {classData.subjects.length}
