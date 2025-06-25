@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Calendar, RefreshCw, Download } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { getPerformanceColors } from "@/lib/colors";
 
 // Type definitions
 interface ClassData {
@@ -155,6 +156,13 @@ const DvtMarksTable: React.FC = () => {
     );
   };
 
+  const getTotalPeriodsForDay = (dayData: DayData): number => {
+    return classes.reduce((total, classNum) => {
+      const classData = dayData.classes[classNum] || { subjects: [] };
+      return total + classData.subjects.length;
+    }, 0);
+  };
+
   const exportToCSV = (): void => {
     const headers = ["Date", ...classes.map((c) => `Class ${c}`), "Total"];
     const csvContent = [
@@ -292,10 +300,15 @@ const DvtMarksTable: React.FC = () => {
                   </div>
                 </td>
                 {classes.map((classNum: number) => {
-                  const classData = dayData.classes[classNum] || { subjects: [] };
+                  const classData = dayData.classes[classNum] || {
+                    subjects: [],
+                  };
                   // Instead of storing <span> in subjectDots, store color and tooltip
                   const subjectDotData = classData.subjects.map((subj) => {
-                    const avgMark = subj.questionCount > 0 ? subj.totalMarks / subj.questionCount : 0;
+                    const avgMark =
+                      subj.questionCount > 0
+                        ? subj.totalMarks / subj.questionCount
+                        : 0;
                     const percentage = (avgMark / 2) * 100;
                     return {
                       colorClass: getPercentageColorClass(percentage),
@@ -305,27 +318,38 @@ const DvtMarksTable: React.FC = () => {
                   // Grid settings
                   const cols = 3;
                   const rows = 3;
-                  const gridCells: ({ colorClass: string; tooltip: string } | null)[] = Array.from({ length: rows * cols }, () => null);
+                  const gridCells: ({
+                    colorClass: string;
+                    tooltip: string;
+                  } | null)[] = Array.from({ length: rows * cols }, () => null);
                   subjectDotData.forEach((dot, i) => {
                     const row = rows - 1 - Math.floor(i / cols);
                     const col = i % cols;
                     gridCells[row * cols + col] = dot;
                   });
-                  const totalPeriods = classData.subjects.reduce((sum, subj) => sum + subj.questionCount, 0);
+                  const totalPeriods = classData.subjects.reduce(
+                    (sum, subj) => sum + subj.questionCount,
+                    0
+                  );
                   const overallPercentage =
                     totalPeriods > 0
-                      ? (classData.subjects.reduce((sum, subj) => sum + subj.totalMarks, 0) /
-                          (totalPeriods * 2)) * 100
+                      ? (classData.subjects.reduce(
+                          (sum, subj) => sum + subj.totalMarks,
+                          0
+                        ) /
+                          (totalPeriods * 2)) *
+                        100
                       : 0;
+                  console.log("overallPercentage:", overallPercentage);
                   return (
                     <td
                       key={classNum}
                       className="border border-gray-300 px-2 py-3 text-center relative"
-                      style={{ minWidth: 50, height: 72 }} 
-                    > 
+                      style={{ minWidth: 50, height: 72 }}
+                    >
                       {/* Badge fixed in top right */}
                       <span
-                        className={`absolute top-1 right-1 inline-block px-1 py-0.25 rounded-full text-[10px] font-semibold ${getColorClass(classData.subjects.length)}`}
+                        className={`absolute top-1 right-1 inline-block px-2 py-0.25 rounded-full text-[10px] font-semibold text-white ${getPercentageColorClass(overallPercentage)}`}
                         style={{ zIndex: 1 }}
                       >
                         {classData.subjects.length}
@@ -355,7 +379,7 @@ const DvtMarksTable: React.FC = () => {
                   );
                 })}
                 <td className="border border-gray-300 px-4 py-3 text-center font-bold text-gray-800">
-                  {getTotalForDay(dayData)}
+                  {getTotalPeriodsForDay(dayData)}
                 </td>
               </tr>
             ))}
@@ -384,12 +408,12 @@ const DvtMarksTable: React.FC = () => {
       {/* Description */}
       <div className="mt-4 text-gray-700 text-sm">
         This table shows the count of periods (questions asked) in each class
-        for each day. The colored bar below visually represents the
-        performance of that class on that day.
+        for each day. The colored bar below visually represents the performance
+        of that class on that day.
       </div>
 
       {/* Legend */}
-      <div className="mt-4 flex flex-wrap gap-4 text-sm">
+      {/* <div className="mt-4 flex flex-wrap gap-4 text-sm">
         <div className="flex items-center gap-2">
           <span className="text-gray-600">Legend:</span>
         </div>
@@ -413,7 +437,7 @@ const DvtMarksTable: React.FC = () => {
           <span className="inline-block w-4 h-4 bg-green-100 rounded"></span>
           <span className="text-gray-600">Excellent (8+)</span>
         </div>
-      </div>
+      </div> */}
 
       <div className="mt-4 flex flex-wrap gap-4 text-sm">
         <div className="flex items-center gap-2">
